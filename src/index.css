@@ -7,44 +7,130 @@
   --color-brand-accent: #E86C38;
 }
 
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #FBF9F5;
+  background:
+    radial-gradient(circle at 8% -10%, rgba(232, 108, 56, 0.09), transparent 32rem),
+    radial-gradient(circle at 90% 8%, rgba(24, 59, 43, 0.08), transparent 34rem),
+    #FBF9F5;
   color: #1C2520;
+  min-height: 100vh;
+}
+
+::selection {
+  background: #183B2B;
+  color: white;
 }
 
 @keyframes steam {
-  0% { transform: translateY(0) scaleX(1); opacity: 0; }
-  50% { opacity: 0.6; }
-  100% { transform: translateY(-24px) scaleX(1.3); opacity: 0; }
+  0% { transform: translateY(6px) scaleX(0.9); opacity: 0; }
+  25% { opacity: 0.7; }
+  100% { transform: translateY(-34px) scaleX(1.35); opacity: 0; }
 }
 
 @keyframes simmer {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
+  50% { transform: scale(1.025); }
 }
 
 @keyframes pulseGently {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.75; }
+  50% { opacity: 0.7; }
 }
 
-.animate-steam-1 {
-  animation: steam 2.4s ease-out infinite;
+@keyframes floatSoft {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-1deg); }
+  50% { transform: translate3d(0, -10px, 0) rotate(1deg); }
 }
 
-.animate-steam-2 {
-  animation: steam 2.8s ease-out infinite 0.9s;
+@keyframes floatSoftAlt {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(1deg); }
+  50% { transform: translate3d(0, 8px, 0) rotate(-1deg); }
 }
 
-.animate-steam-3 {
-  animation: steam 2.1s ease-out infinite 1.4s;
+@keyframes orbitSlow {
+  from { transform: rotate(0deg) translateX(138px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(138px) rotate(-360deg); }
 }
 
-.animate-simmer {
-  animation: simmer 3s ease-in-out infinite;
+@keyframes orbitReverse {
+  from { transform: rotate(360deg) translateX(104px) rotate(-360deg); }
+  to { transform: rotate(0deg) translateX(104px) rotate(0deg); }
 }
 
-.animate-pulse-gentle {
-  animation: pulseGently 2s ease-in-out infinite;
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.96); }
+  50% { opacity: 0.78; transform: scale(1.04); }
+}
+
+@keyframes sheen {
+  0% { transform: translateX(-140%) rotate(14deg); }
+  55%, 100% { transform: translateX(240%) rotate(14deg); }
+}
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes scanLine {
+  0%, 100% { transform: translateY(-4px); opacity: 0.2; }
+  50% { transform: translateY(48px); opacity: 0.7; }
+}
+
+.animate-steam-1 { animation: steam 2.4s ease-out infinite; }
+.animate-steam-2 { animation: steam 2.8s ease-out infinite 0.9s; }
+.animate-steam-3 { animation: steam 2.1s ease-out infinite 1.4s; }
+.animate-simmer { animation: simmer 3s ease-in-out infinite; }
+.animate-pulse-gentle { animation: pulseGently 2s ease-in-out infinite; }
+.animate-float-soft { animation: floatSoft 5.5s ease-in-out infinite; }
+.animate-float-soft-alt { animation: floatSoftAlt 6.5s ease-in-out infinite; }
+.animate-orbit-slow { animation: orbitSlow 20s linear infinite; }
+.animate-orbit-reverse { animation: orbitReverse 16s linear infinite; }
+.animate-glow-pulse { animation: glowPulse 4s ease-in-out infinite; }
+.animate-rise-in { animation: riseIn 0.55s cubic-bezier(.2,.8,.2,1) both; }
+.animate-scan-line { animation: scanLine 2.8s ease-in-out infinite; }
+
+.hero-sheen::after {
+  content: '';
+  position: absolute;
+  inset: -35%;
+  width: 24%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  animation: sheen 7s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.kitchen-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.glass-panel {
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.food-shadow {
+  filter: drop-shadow(0 28px 38px rgba(6, 28, 18, 0.34));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
 }
