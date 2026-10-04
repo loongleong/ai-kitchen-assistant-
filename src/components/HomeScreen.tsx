@@ -14,6 +14,12 @@ interface HomeScreenProps {
   onToggleSave: (recipeId: string) => void;
 }
 
+const OrbitChip = ({ label, className = '' }: { label: string; className?: string }) => (
+  <div className={`absolute z-20 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white shadow-lg backdrop-blur-md ${className}`}>
+    {label}
+  </div>
+);
+
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   userProfile,
   featuredRecipe,
@@ -25,224 +31,159 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onToggleSave
 }) => {
   return (
-    <div className="space-y-12 pb-16">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-8 md:pt-14 pb-8 max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          {/* Left Column: Core Value Proposition */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Identity context indicator */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EAF2EC] border border-[#183B2B]/12 text-xs font-semibold text-[#183B2B]">
-              <span className="w-2 h-2 rounded-full bg-[#183B2B] animate-pulse" />
-              <span>Tailored for {userProfile.identity}</span>
-              <span className="text-[#183B2B]/40">·</span>
-              <span>Under RM{userProfile.typicalBudgetRM}/meal</span>
-            </div>
+    <div className="pb-20">
+      <section className="relative mx-auto max-w-7xl px-6 pt-8 md:pt-12">
+        <div className="hero-sheen kitchen-grid relative overflow-hidden rounded-[2rem] border border-[#183B2B]/10 bg-[#102D21] px-6 py-8 shadow-[0_32px_90px_rgba(16,45,33,0.22)] sm:px-10 md:py-12 lg:px-14">
+          <div className="pointer-events-none absolute -left-20 -top-24 h-72 w-72 rounded-full bg-[#E86C38]/20 blur-3xl animate-glow-pulse" />
+          <div className="pointer-events-none absolute -bottom-24 right-12 h-96 w-96 rounded-full bg-[#4BA17B]/18 blur-3xl animate-glow-pulse" />
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#183B2B] tracking-tight leading-[1.08] text-balance">
-              What can I cook <br className="hidden sm:inline" />
-              <span className="text-[#E86C38]">right now?</span>
-            </h1>
-
-            <p className="text-base sm:text-lg text-[#1C2520]/80 max-w-xl leading-relaxed">
-              Tell us what you have. We’ll match your budget, kitchen tools and food preferences — no grocery waste, no missing pantry ingredients.
-            </p>
-
-            {/* CTAs */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
-              <button
-                onClick={onFindMealsClick}
-                className="px-7 py-3.5 rounded-2xl bg-[#183B2B] hover:bg-[#132E22] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer flex items-center gap-2.5"
-              >
-                <span>Find my meals</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                  <polyline points="12 5 19 12 12 19"/>
-                </svg>
-              </button>
-
-              <button
-                onClick={() => onNavigate('scan')}
-                className="px-6 py-3.5 rounded-2xl bg-white hover:bg-[#EAF2EC] text-[#183B2B] font-semibold text-sm border border-[#183B2B]/15 transition-all cursor-pointer flex items-center gap-2"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                  <circle cx="12" cy="13" r="4"/>
-                </svg>
-                <span>Scan food photo</span>
-              </button>
-            </div>
-
-            {/* Quick Proof Metrics adjacent to claim */}
-            <div className="pt-4 flex items-center gap-6 text-xs text-[#1C2520]/70">
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-[#183B2B]">RM15</span>
-                <span>Max Target</span>
-              </div>
-              <span className="text-slate-300">·</span>
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-[#183B2B]">&lt;25m</span>
-                <span>Avg Cook Time</span>
-              </div>
-              <span className="text-slate-300">·</span>
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-[#183B2B]">94%+</span>
-                <span>Pantry Match</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Smart Recommendation Preview Card */}
-          <div className="lg:col-span-5">
-            <div 
-              onClick={() => onSelectRecipe(featuredRecipe)}
-              className="group relative bg-white rounded-3xl p-5 border border-[#183B2B]/10 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden"
-            >
-              {/* Top Banner Tag */}
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] uppercase font-bold tracking-wider text-[#183B2B] bg-[#EAF2EC] px-3 py-1 rounded-full border border-[#183B2B]/10">
-                  Top Smart Recommendation
-                </span>
-                <span className="text-xs font-bold text-[#10B981] flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-ping" />
-                  {featuredRecipe.matchScore}% Match
-                </span>
+          <div className="relative z-10 grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
+            <div className="space-y-7 lg:col-span-6 animate-rise-in">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3.5 py-2 text-xs font-semibold text-white/90 backdrop-blur-md">
+                <span className="h-2 w-2 rounded-full bg-[#F7A46D] shadow-[0_0_14px_rgba(247,164,109,0.8)] animate-pulse" />
+                <span>AI kitchen profile active</span>
+                <span className="text-white/35">·</span>
+                <span>{userProfile.identity}</span>
               </div>
 
-              {/* Visual Showcase */}
-              <div className="relative aspect-[16/10] rounded-2xl overflow-hidden mb-4 shadow-sm">
-                <DishIllustration dishId={featuredRecipe.id} className="w-full h-full" size="hero" />
-                <div className="absolute bottom-2.5 left-3 bg-black/50 backdrop-blur-xs text-white text-xs px-2.5 py-1 rounded-lg">
-                  {featuredRecipe.cuisine} · {featuredRecipe.difficulty}
-                </div>
-              </div>
-
-              {/* Recipe Name & Value */}
               <div>
-                <h3 className="text-xl font-bold text-[#183B2B] group-hover:text-[#E86C38] transition-colors mb-1">
-                  {featuredRecipe.name}
-                </h3>
-                <p className="text-xs text-[#1C2520]/75 line-clamp-1 mb-3">
-                  {featuredRecipe.tagline}
-                </p>
+                <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#F7A46D]">Your kitchen, understood</p>
+                <h1 className="max-w-2xl text-5xl font-extrabold leading-[0.98] tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
+                  What can I cook
+                  <span className="block text-[#F28A54]">right now?</span>
+                </h1>
+              </div>
 
-                {/* Match explanation callout */}
-                <div className="bg-[#F8F6F0] rounded-xl p-2.5 mb-4 border border-[#183B2B]/6 text-xs text-[#1C2520]/85 flex items-center justify-between">
-                  <span className="font-semibold text-[#183B2B]">
-                    “You already have 6/7 ingredients”
-                  </span>
-                  <span className="text-[11px] text-[#1C2520]/60">1-pan cleanup</span>
-                </div>
+              <p className="max-w-xl text-base leading-relaxed text-white/72 sm:text-lg">
+                Tell us what you already have. SavorAI combines your pantry, budget, kitchen tools and food preferences into meals you can realistically make now.
+              </p>
 
-                {/* Key Metrics Row */}
-                <div className="grid grid-cols-3 gap-2 py-2 border-t border-[#183B2B]/8 text-center">
-                  <div>
-                    <span className="text-[10px] text-[#1C2520]/60 block">Cook Time</span>
-                    <span className="text-sm font-bold text-[#1C2520]">{featuredRecipe.timeMinutes} min</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-[#1C2520]/60 block">Est. Cost</span>
-                    <span className="text-sm font-bold text-[#183B2B]">RM{featuredRecipe.estimatedCostRM.toFixed(2)}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-[#1C2520]/60 block">Energy</span>
-                    <span className="text-sm font-bold text-[#183B2B]">{featuredRecipe.calories} kcal</span>
-                  </div>
-                </div>
-
-                <button className="w-full mt-3 py-2.5 rounded-xl bg-[#183B2B] group-hover:bg-[#132E22] text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs">
-                  <span>View Recipe & Cook</span>
-                  <span>→</span>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={onFindMealsClick}
+                  className="group inline-flex items-center gap-2.5 rounded-2xl bg-[#F28A54] px-6 py-3.5 text-sm font-bold text-[#102D21] shadow-[0_12px_30px_rgba(232,108,56,0.25)] transition-all hover:-translate-y-0.5 hover:bg-[#FF9B66] hover:shadow-[0_16px_36px_rgba(232,108,56,0.32)] active:translate-y-0"
+                >
+                  <span>Explore what I can cook</span>
+                  <span className="transition-transform group-hover:translate-x-1">→</span>
+                </button>
+                <button
+                  onClick={() => onNavigate('scan')}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/8 px-5 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/14"
+                >
+                  <span>Scan food photo</span>
                 </button>
               </div>
+
+              <div className="grid max-w-xl grid-cols-3 gap-3 pt-2">
+                {[
+                  [`RM${userProfile.typicalBudgetRM}`, 'usual budget'],
+                  ['<25 min', 'quick picks'],
+                  [`${featuredRecipe.matchScore}%`, 'best match']
+                ].map(([value, label]) => (
+                  <div key={label} className="rounded-2xl border border-white/10 bg-white/7 px-4 py-3 backdrop-blur-sm">
+                    <div className="text-lg font-extrabold text-white">{value}</div>
+                    <div className="text-[11px] font-medium text-white/50">{label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="lg:col-span-6">
+              <div
+                onClick={() => onSelectRecipe(featuredRecipe)}
+                className="group relative mx-auto aspect-square w-full max-w-[560px] cursor-pointer"
+              >
+                <div className="absolute inset-[9%] rounded-full border border-white/10" />
+                <div className="absolute inset-[20%] rounded-full border border-white/12" />
+                <div className="absolute inset-[30%] rounded-full border border-dashed border-white/10" />
+
+                <div className="absolute inset-[18%] rounded-full bg-[#2C7A5B]/30 blur-3xl animate-glow-pulse" />
+
+                <div className="absolute inset-[23%] z-10 overflow-hidden rounded-full border border-white/16 bg-[#163D2D] shadow-[0_24px_70px_rgba(0,0,0,0.28)] transition-all duration-500 group-hover:scale-[1.025] group-hover:shadow-[0_28px_90px_rgba(0,0,0,0.36)] food-shadow">
+                  <DishIllustration dishId={featuredRecipe.id} className="h-full w-full" size="hero" />
+                </div>
+
+                <div className="absolute left-1/2 top-1/2 z-20 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/80 shadow-[0_0_18px_white]" />
+
+                <div className="absolute left-1/2 top-1/2 z-20 animate-orbit-slow">
+                  <span className="block rounded-full border border-white/15 bg-[#F28A54] px-3 py-2 text-[10px] font-extrabold text-[#102D21] shadow-lg">CHICKEN</span>
+                </div>
+                <div className="absolute left-1/2 top-1/2 z-20 animate-orbit-reverse">
+                  <span className="block rounded-full border border-white/15 bg-white px-3 py-2 text-[10px] font-extrabold text-[#183B2B] shadow-lg">RICE</span>
+                </div>
+
+                <OrbitChip label="EGG" className="left-[6%] top-[26%] animate-float-soft" />
+                <OrbitChip label="GARLIC" className="right-[5%] top-[22%] animate-float-soft-alt" />
+                <OrbitChip label="SOY SAUCE" className="left-[9%] bottom-[24%] animate-float-soft-alt" />
+                <OrbitChip label="GINGER" className="right-[4%] bottom-[22%] animate-float-soft" />
+
+                <div className="absolute right-[2%] top-[43%] z-30 rounded-2xl border border-white/15 bg-white/10 p-3 text-white shadow-xl backdrop-blur-xl">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-white/55">Pantry match</div>
+                  <div className="mt-1 text-2xl font-extrabold">{featuredRecipe.matchScore}%</div>
+                </div>
+
+                <div className="absolute bottom-[3%] left-1/2 z-30 w-[82%] -translate-x-1/2 rounded-3xl border border-white/15 bg-white/10 p-4 text-white shadow-2xl backdrop-blur-xl transition-transform duration-300 group-hover:-translate-y-1">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#F7A46D]">Top smart recommendation</p>
+                      <h3 className="mt-1 text-lg font-bold leading-tight">{featuredRecipe.name}</h3>
+                    </div>
+                    <span className="rounded-full bg-white/12 px-2.5 py-1 text-[10px] font-semibold">{featuredRecipe.cuisine}</span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-2 border-t border-white/10 pt-3 text-center">
+                    <div><div className="text-sm font-bold">{featuredRecipe.timeMinutes}m</div><div className="text-[9px] text-white/45">TIME</div></div>
+                    <div><div className="text-sm font-bold">RM{featuredRecipe.estimatedCostRM.toFixed(2)}</div><div className="text-[9px] text-white/45">COST</div></div>
+                    <div><div className="text-sm font-bold">{featuredRecipe.calories}</div><div className="text-[9px] text-white/45">KCAL</div></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Quick Actions Row */}
-      <section className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button
-            onClick={() => onNavigate('cook')}
-            className="p-4 rounded-2xl bg-white border border-[#183B2B]/8 hover:border-[#183B2B]/25 hover:shadow-md transition-all text-left group cursor-pointer"
-          >
-            <div className="w-9 h-9 rounded-xl bg-[#EAF2EC] text-[#183B2B] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <line x1="9" y1="3" x2="9" y2="21"/>
-              </svg>
-            </div>
-            <h4 className="font-bold text-sm text-[#183B2B] mb-0.5">Scan my fridge</h4>
-            <p className="text-xs text-[#1C2520]/65">Check ingredients & pantry</p>
-          </button>
-
-          <button
-            onClick={() => onNavigate('scan')}
-            className="p-4 rounded-2xl bg-white border border-[#183B2B]/8 hover:border-[#183B2B]/25 hover:shadow-md transition-all text-left group cursor-pointer"
-          >
-            <div className="w-9 h-9 rounded-xl bg-[#FFF3ED] text-[#E86C38] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                <circle cx="12" cy="13" r="4"/>
-              </svg>
-            </div>
-            <h4 className="font-bold text-sm text-[#183B2B] mb-0.5">Scan food</h4>
-            <p className="text-xs text-[#1C2520]/65">Estimate photo calories</p>
-          </button>
-
-          <button
-            onClick={() => onNavigate('healthy')}
-            className="p-4 rounded-2xl bg-white border border-[#183B2B]/8 hover:border-[#183B2B]/25 hover:shadow-md transition-all text-left group cursor-pointer"
-          >
-            <div className="w-9 h-9 rounded-xl bg-[#EAF2EC] text-[#183B2B] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/>
-                <path d="M12 8v8"/>
-                <path d="M8 12h8"/>
-              </svg>
-            </div>
-            <h4 className="font-bold text-sm text-[#183B2B] mb-0.5">Healthy mode</h4>
-            <p className="text-xs text-[#1C2520]/65">Goal-based nutrition swaps</p>
-          </button>
-
-          <button
-            onClick={() => onNavigate('cook')}
-            className="p-4 rounded-2xl bg-white border border-[#183B2B]/8 hover:border-[#183B2B]/25 hover:shadow-md transition-all text-left group cursor-pointer"
-          >
-            <div className="w-9 h-9 rounded-xl bg-[#EAF2EC] text-[#183B2B] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-              </svg>
-            </div>
-            <h4 className="font-bold text-sm text-[#183B2B] mb-0.5">Quick cook</h4>
-            <p className="text-xs text-[#1C2520]/65">Under 15 minutes meals</p>
-          </button>
+      <section className="mx-auto mt-7 max-w-7xl px-6">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          {[
+            { title: 'Scan my fridge', text: 'Turn a fridge photo into meal ideas', action: () => onNavigate('cook'), tone: 'bg-[#DDEDE5]' },
+            { title: 'Scan food', text: 'Estimate calories from a photo', action: () => onNavigate('scan'), tone: 'bg-[#FFF0E7]' },
+            { title: 'Healthy mode', text: 'Adapt meals to your nutrition goal', action: () => onNavigate('healthy'), tone: 'bg-[#E7F0E8]' },
+            { title: 'Quick cook', text: 'Jump to fast meals under 15 minutes', action: () => onNavigate('cook'), tone: 'bg-[#F4EEE4]' }
+          ].map((item, index) => (
+            <button
+              key={item.title}
+              onClick={item.action}
+              className="group relative overflow-hidden rounded-3xl border border-[#183B2B]/8 bg-white p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+            >
+              <div className={`mb-8 h-12 w-12 rounded-2xl ${item.tone} flex items-center justify-center text-sm font-black text-[#183B2B] transition-transform group-hover:scale-110 group-hover:rotate-3`}>
+                0{index + 1}
+              </div>
+              <div className="text-sm font-bold text-[#183B2B]">{item.title}</div>
+              <div className="mt-1 text-xs leading-relaxed text-[#1C2520]/60">{item.text}</div>
+              <div className="absolute bottom-4 right-4 text-[#E86C38] opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100">→</div>
+            </button>
+          ))}
         </div>
       </section>
 
-      {/* "Made for you" Recipe Grid */}
-      <section className="max-w-7xl mx-auto px-6">
-        <div className="flex items-end justify-between mb-6">
+      <section className="mx-auto mt-16 max-w-7xl px-6">
+        <div className="mb-7 flex items-end justify-between gap-6">
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#183B2B] tracking-tight">
-              Made for you
-            </h2>
-            <p className="text-xs md:text-sm text-[#1C2520]/70 mt-1">
-              Personalised for {userProfile.name} based on your {userProfile.identity} profile & pantry staples.
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#E86C38]">Personalised kitchen intelligence</p>
+            <h2 className="text-3xl font-extrabold tracking-tight text-[#183B2B] md:text-4xl">Made for you</h2>
+            <p className="mt-2 max-w-xl text-sm text-[#1C2520]/65">
+              Suggestions tuned for {userProfile.name}'s {userProfile.identity} profile, usual budget and pantry habits.
             </p>
           </div>
-
           <button
             onClick={onFindMealsClick}
-            className="text-xs font-bold text-[#183B2B] hover:text-[#E86C38] flex items-center gap-1 transition-colors cursor-pointer"
+            className="hidden rounded-2xl border border-[#183B2B]/10 bg-white px-4 py-2 text-xs font-bold text-[#183B2B] transition-all hover:-translate-y-0.5 hover:border-[#183B2B]/25 hover:shadow-md sm:block"
           >
-            <span>See all 12 recommendations</span>
-            <span>→</span>
+            See all recommendations →
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {madeForYouRecipes.map((recipe) => (
             <RecipeCard
               key={recipe.id}
