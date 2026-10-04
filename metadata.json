@@ -1,0 +1,6 @@
+{
+  "name": "SavorAI",
+  "description": "AI Personal Kitchen Assistant — Tell us what you have, we’ll tell you what you can cook.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
