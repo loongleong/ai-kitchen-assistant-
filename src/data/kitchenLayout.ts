@@ -1,7 +1,7 @@
-// Positions from the approved panorama. Names/categories/capabilities remain in equipmentCatalog.
+// Presentation-only anchors for the editorial panorama. Tool definitions stay in equipmentCatalog.
 export const KITCHEN_ZONES = [
-  {name:'Cooking',description:'A little heat. Endless possibilities.',tools:[['stove',32,66],['frying-pan',18,46],['wok',48,39],['pot',77,48],['oven',48,84],['saucepan',85,76]]},
-  {name:'Prep',description:'Where good meals begin.',tools:[['knife',16,60],['cutting-board',36,77],['mixing-bowl',50,46],['whisk',72,61],['grater',82,42]]},
-  {name:'Appliances',description:'Your everyday helping hands.',tools:[['microwave',25,27],['rice-cooker',15,62],['air-fryer',41,47],['blender',62,35],['food-processor',67,71],['electric-kettle',87,53]]},
-  {name:'Storage',description:'Discover a few more possibilities.',tools:[['steamer',17,27],['pressure-cooker',39,48],['slow-cooker',67,27],['toaster-oven',78,67],['mortar-pestle',27,73],['peeler',52,87],['electric-grill',85,87]]}
+  {name:'Cooking',description:'A little heat. Endless possibilities.',tools:[['stove',47,66],['frying-pan',28,56],['wok',49,50],['pot',73,57],['oven',49,85],['saucepan',93,50]]},
+  {name:'Prep',description:'Where good meals begin.',tools:[['knife',47,56],['cutting-board',42,65],['mixing-bowl',70,51],['whisk',75,64],['grater',88,43]]},
+  {name:'Appliances',description:'Your everyday helping hands.',tools:[['microwave',23,24],['rice-cooker',16,55],['air-fryer',38,49],['blender',58,42],['food-processor',76,57],['electric-kettle',92,49]]},
+  {name:'Storage',description:'Discover a few more possibilities.',tools:[['steamer',23,19],['pressure-cooker',24,38],['slow-cooker',67,33],['toaster-oven',60,58],['mortar-pestle',19,56],['peeler',38,62],['electric-grill',88,58]]}
 ] as const;

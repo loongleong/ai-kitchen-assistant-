@@ -1,5 +1,5 @@
 import { readFile, readdir, writeFile, mkdir } from 'node:fs/promises';
-import { resolve, relative, sep } from 'node:path';
+import { dirname, resolve, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transform } from 'esbuild';
 
@@ -44,6 +44,14 @@ await transform(javascript, { loader:'js', target:'es2022' });
 html = html.replace(scripts[0][0], '');
 for (const stylesheet of [...html.matchAll(/<link\b[^>]*\bhref="(\/assets\/[^" ]+\.css)"[^>]*>/g)]) {
   let css = await readFile(resolve(dist, stylesheet[1].replace(/^\//, '')), 'utf8');
+  // Keep locally bundled typography available in the standalone export too.
+  for (const font of [...css.matchAll(/url\(["']?(\/fonts\/[^"'()]+\.woff2)["']?\)/g)]) {
+    const path = resolve(dist, font[1].replace(/^\//, ''));
+    const bytes = await readFile(path);
+    css = css.replaceAll(font[0], `url("data:font/woff2;base64,${bytes.toString('base64')}")`);
+    const license = await readFile(resolve(dirname(path), 'LICENSE.txt'), 'utf8');
+    css += `\n/* ${license.replace(/\*\//g, '* /')} */`;
+  }
   css = css.replace(/url\((["']?)(\/images\/[^)"']+)\1\)/g, (_,quote,url)=>{
     if (!images[url]) throw new Error(`Missing CSS image: ${url}`);
     return `url("${images[url]}")`;

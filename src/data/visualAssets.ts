@@ -2,7 +2,7 @@
 export const APPROVED_VISUALS = {
   inspiration:'/images/savor/basil-chicken.webp',
   cooking:'/images/savor/cooking.webp',
-  panorama:'/images/savor/kitchen-panorama.webp',
+  panorama:'/images/savor/kitchen-editorial-panorama.webp',
   kitchen:'/images/savor/kitchen.webp'
 };
 export const CUISINE_VISUALS:Record<string,{src:string;alt:string}> = {
