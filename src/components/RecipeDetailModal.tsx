@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AnimatePresence, LazyMotion, domAnimation, m, useReducedMotion } from 'motion/react';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Bookmark, Check, ChevronDown, Clock3, Flame, Leaf, Play, Sparkles, Utensils, Wallet, X } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Bookmark, Check, ChevronDown, Clock3, Flame, Leaf, Play, Sparkles, Utensils, X } from 'lucide-react';
 import { Recipe, UserKitchenProfile } from '../types';
 import { FoodVisual } from './FoodVisual';
 import { useNativeModal } from './DesignUI';
@@ -47,7 +47,6 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
   const mealBudget = queryContext?.budgetRM ?? userProfile.typicalBudgetRM;
   const toolFit = equipmentCompatibility(recipe.requiredEquipment,kitchenTools,recipe.equipmentRequirements);
   const missingEquipment = toolFit.missing;
-  const preferredCuisine = userProfile.favoriteCuisines.some(cuisine => cuisine.toLowerCase() === recipe.cuisine.toLowerCase());
   const pricingData = useRecipeData();
   const pricing = estimateRecipePricing(recipe,{...pricingData,budgetRM:mealBudget,pantryKnown});
   const budgetFits = pricing.budgetShortfallRM === 0;
@@ -76,19 +75,8 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
           </section>
 
           <div className="rd-content">
-            <section className="rd-reasoning" aria-labelledby="rd-reason-title">
-              <div className="rd-section-intro"><p className="rd-eyebrow">01 / The kitchen fit</p><h2 id="rd-reason-title">Why SavorAI picked this for you</h2><p className="rd-match-reason">{recipe.matchReason}</p></div>
-              <ul className="rd-reason-list">
-                <li><Check size={15} aria-hidden="true" /><span><strong>{pantryKnown ? `${alreadyHaveIngredients.length} / ${recipe.ingredients.length} ingredients ready` : `Portioned for ${recipe.servings} servings`}</strong><small>{pantryKnown ? queryContext?.stage === 'refined' ? 'Based on the ingredient list you supplied' : 'Based on this recipe’s pantry inventory' : 'Check the recipe ingredients before you begin'}</small></span></li>
-                <li className={budgetFits ? '' : 'rd-reason-caution'}>{budgetFits ? <Check size={15} aria-hidden="true" /> : <Wallet size={15} aria-hidden="true" />}<span><strong>{budgetFits ? queryContext ? 'Fits your selected budget' : 'Fits your usual budget' : queryContext ? 'Above your selected budget' : 'Above your usual budget'}</strong><small>Estimated meal cost RM{pricing.estimatedMealCostRM.toFixed(2)} · {budgetFits ? `Remaining budget RM${pricing.remainingBudgetRM!.toFixed(2)}` : `Over budget by RM${pricing.budgetShortfallRM.toFixed(2)}`} {pricing.mealMethod === 'legacy-recipe-fallback' && '· Fallback recipe estimate'}</small></span></li>
-                <li className={missingEquipment.length ? 'rd-reason-caution' : ''}>{missingEquipment.length ? <Utensils size={15} aria-hidden="true" /> : <Check size={15} aria-hidden="true" />}<span><strong>{missingEquipment.length ? `${recipe.requiredEquipment.length - missingEquipment.length} / ${recipe.requiredEquipment.length} tools available` : 'Uses equipment you own'}</strong><small>{missingEquipment.length ? `Still needed: ${missingEquipment.join(', ')}` : 'Your kitchen is ready'}</small></span></li>
-                <li><Clock3 size={15} aria-hidden="true" /><span><strong>Ready in {recipe.timeMinutes} minutes</strong><small>Recipe’s estimated cooking time</small></span></li>
-                {preferredCuisine && <li><Check size={15} aria-hidden="true" /><span><strong>Matches your preferred cuisine</strong><small>{recipe.cuisine} is in your kitchen profile</small></span></li>}
-              </ul>
-            </section>
-
             <section className="rd-inventory-section" aria-labelledby="rd-inventory-title">
-              <div className="rd-section-heading"><div><p className="rd-eyebrow">02 / Before you begin</p><h2 id="rd-inventory-title">{pantryKnown ? 'A look inside your kitchen.' : 'Your recipe ingredients.'}</h2></div><span>{recipe.ingredients.length} ingredients · {recipe.servings} servings</span></div>
+              <div className="rd-section-heading"><div><p className="rd-eyebrow">01 / Before you begin</p><h2 id="rd-inventory-title">{pantryKnown ? 'A look inside your kitchen.' : 'Your recipe ingredients.'}</h2></div><span>{recipe.ingredients.length} ingredients · {recipe.servings} servings</span></div>
               <div className={`rd-inventory ${!pantryKnown ? 'rd-inventory-unchecked' : ''}`}>
                 {pantryKnown && <div className="rd-have">
                   <div className="rd-inventory-heading"><Check size={17} aria-hidden="true" /><h3>You already have</h3><span>{alreadyHaveIngredients.length.toString().padStart(2, '0')}</span></div>
@@ -112,7 +100,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
             </section>
 
             <section className="rd-substitutions" aria-labelledby="rd-substitutions-title">
-              <div className="rd-section-heading"><div><p className="rd-eyebrow">03 / A flexible kitchen</p><h2 id="rd-substitutions-title">Substitutions</h2><p className="rd-section-description">A different ingredient. The same possibility.</p></div></div>
+              <div className="rd-section-heading"><div><p className="rd-eyebrow">02 / A flexible kitchen</p><h2 id="rd-substitutions-title">Substitutions</h2><p className="rd-section-description">A different ingredient. The same possibility.</p></div></div>
               <div className="rd-substitution-list">{needToBuyIngredients.filter(item => item.substitute).map(item => (
                 <div className="rd-missing-item" key={item.id}>
                   <div className="rd-missing-item-heading"><div><strong>{item.name}</strong><small>{item.amount}</small></div></div>
@@ -126,7 +114,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
             </section>
 
             <section className="rd-nutrition" aria-labelledby="rd-nutrition-title">
-              <div className="rd-section-heading"><div><p className="rd-eyebrow">04 / The nourishment</p><h2 id="rd-nutrition-title">Nutritional profile</h2></div><span>Per serving · {healthierMode ? 'Healthier' : 'Original'} version</span></div>
+              <div className="rd-section-heading"><div><p className="rd-eyebrow">03 / The nourishment</p><h2 id="rd-nutrition-title">Nutritional profile</h2></div><span>Per serving · {healthierMode ? 'Healthier' : 'Original'} version</span></div>
               <div className="rd-nutrition-values" aria-live="polite">
                 <div className="rd-calorie-value"><span><Flame size={14} aria-hidden="true" /> Energy</span><div><m.strong key={displayCalories} initial={{ opacity: reducedMotion ? 1 : 0 }} animate={{ opacity: 1 }} transition={transition}>{displayCalories}</m.strong><small>kcal</small></div>{healthierMode && <p>Reduced from {recipe.calories} kcal</p>}</div>
                 <dl className="rd-macros"><div><dt>Protein</dt><dd>{displayProtein}<small>g</small></dd></div><div><dt>Carbs</dt><dd>{displayCarbs}<small>g</small></dd></div><div><dt>Fat</dt><dd>{displayFat}<small>g</small></dd></div><div><dt>Fibre</dt><dd>{displayFibre}<small>g</small></dd></div></dl>
@@ -135,7 +123,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
             </section>
 
             <section className={`rd-healthier ${healthierMode ? 'rd-healthier-active' : ''}`} aria-labelledby="rd-healthier-title">
-              <div className="rd-section-heading"><div><p className="rd-eyebrow"><Leaf size={13} aria-hidden="true" />05 / A little lighter</p><h2 id="rd-healthier-title">Same comfort. A lighter version.</h2><p className="rd-section-description">A lighter version is available, with the adjustments below.</p></div><span className="rd-version-status" aria-live="polite">{healthierMode ? 'Healthier version selected' : 'Original version selected'}</span></div>
+              <div className="rd-section-heading"><div><p className="rd-eyebrow"><Leaf size={13} aria-hidden="true" />04 / A little lighter</p><h2 id="rd-healthier-title">Same comfort. A lighter version.</h2><p className="rd-section-description">A lighter version is available, with the adjustments below.</p></div><span className="rd-version-status" aria-live="polite">{healthierMode ? 'Healthier version selected' : 'Original version selected'}</span></div>
               <div className="rd-transformation">
                 <div className={`rd-version rd-original ${!healthierMode ? 'rd-version-selected' : ''}`}><span>Original</span><div><strong>{recipe.calories}</strong><small>kcal</small></div><p>Classic recipe</p></div>
                 <div className="rd-transform-action"><button type="button" className="rd-health-toggle" onClick={() => setHealthierMode(!healthierMode)} aria-pressed={healthierMode}><Leaf size={16} aria-hidden="true" /><span>{healthierMode ? 'Healthier Mode Active' : 'Make it healthier'}</span><ArrowRight size={16} aria-hidden="true" /></button><small>{healthierMode ? 'Return to original' : `${recipe.calories - recipe.healthierVariant.calories} fewer kcal per serving`}</small></div>
@@ -148,7 +136,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
               </m.div>
             </section>
 
-            <section className="rd-equipment" aria-labelledby="rd-equipment-title"><div><p className="rd-eyebrow">06 / The tools</p><h2 id="rd-equipment-title">Required equipment</h2><p className="rd-section-description">{missingEquipment.length === 0 ? 'Your kitchen is ready.' : 'Your kitchen checklist.'}</p></div><div className="rd-equipment-items">{recipe.requiredEquipment.map(tool => {
+            <section className="rd-equipment" aria-labelledby="rd-equipment-title"><div><p className="rd-eyebrow">05 / The tools</p><h2 id="rd-equipment-title">Required equipment</h2><p className="rd-section-description">{missingEquipment.length === 0 ? 'Your kitchen is ready.' : 'Your kitchen checklist.'}</p></div><div className="rd-equipment-items">{recipe.requiredEquipment.map(tool => {
               const fit = toolFit.checks.find(check=>check.label === tool);
               const userHasIt = fit?.compatible;
               return <span key={tool} className={userHasIt ? '' : 'rd-tool-missing'}>{userHasIt ? <Check size={13} aria-hidden="true" /> : <Utensils size={13} aria-hidden="true" />}{tool}<small>{userHasIt ? fit!.ownedTools.includes(tool) ? 'In your kitchen' : `${fit!.ownedTools.join(', ')} works` : 'Needed'}</small></span>;

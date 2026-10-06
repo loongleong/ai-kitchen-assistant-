@@ -77,16 +77,7 @@ dialog.rd-overlay::backdrop { background: #071c19a6; backdrop-filter: blur(12px)
 .rd-overlay .rd-content section + section { margin-top: 48px; }
 .rd-overlay .rd-content h2 { font-size: clamp(25px, 2.4vw, 32px); font-weight: 600; letter-spacing: -.045em; line-height: 1.25; text-wrap: balance; }
 .rd-overlay .rd-content h3 { font-weight: 650; }
-.rd-overlay .rd-section-description, .rd-overlay .rd-match-reason { font-size: 13px; line-height: 1.85; color: #5a6f61; margin-top: 12px; }
-.rd-overlay .rd-reasoning { display: grid; grid-template-columns: .9fr 1.2fr; gap: 52px; padding-bottom: 42px; border-bottom: 1px solid #183b2b21; }
-.rd-section-intro h2 { max-width: 340px; }
-.rd-match-reason { max-width: 380px; }
-.rd-overlay .rd-reason-list { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 28px; align-content: center; }
-.rd-reason-list li { display: flex; align-items: start; gap: 11px; line-height: 1.7; }
-.rd-reason-list svg { color: #426847; flex-shrink: 0; margin-top: 3px; }
-.rd-reason-list strong { display: block; font-size: 12px; font-weight: 650; }
-.rd-reason-list small { display: block; color: #5a6f61; font-size: 11px; margin-top: 5px; }
-.rd-reason-caution svg { color: #a64924; }
+.rd-overlay .rd-section-description { font-size: 13px; line-height: 1.85; color: #5a6f61; margin-top: 12px; }
 .rd-overlay .rd-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
 .rd-section-heading > span { font-size: 11px; color: #5a6f61; line-height: 1.8; }
 .rd-overlay .rd-inventory { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 30px; }
@@ -191,7 +182,6 @@ dialog.rd-overlay::backdrop { background: #071c19a6; backdrop-filter: blur(12px)
   .rd-overlay .rd-hero-copy { padding: 34px 30px; gap: 20px; }
   .rd-overlay .rd-hero h1 { font-size: 38px; }
   .rd-overlay .rd-content { padding: 38px 32px 30px; }
-  .rd-overlay .rd-reasoning { gap: 32px; }
   .rd-overlay .rd-transformation { gap: 16px; }
   .rd-overlay .rd-nutrition-values { grid-template-columns: 200px 1fr; gap: 28px; }
   .rd-overlay .rd-macros { gap: 15px; }
@@ -206,8 +196,6 @@ dialog.rd-overlay::backdrop { background: #071c19a6; backdrop-filter: blur(12px)
   .rd-overlay .rd-food-stage img { object-position: 50% 48%; }
   .rd-overlay .rd-hero-copy { padding: 26px 34px 34px; }
   .rd-overlay .rd-hero h1 { font-size: 42px; max-width: 550px; }
-  .rd-overlay .rd-reasoning { grid-template-columns: 1fr; gap: 26px; }
-  .rd-section-intro h2, .rd-match-reason { max-width: none; }
   .rd-overlay .rd-section-heading { flex-direction: column; align-items: start; gap: 12px; }
   .rd-overlay .rd-inventory { gap: 18px; }
   .rd-overlay .rd-have, .rd-overlay .rd-need { padding: 22px; }
@@ -237,8 +225,6 @@ dialog.rd-overlay::backdrop { background: #071c19a6; backdrop-filter: blur(12px)
   .rd-overlay .rd-content { padding: 34px 24px 28px; }
   .rd-overlay .rd-content section + section { margin-top: 36px; }
   .rd-overlay .rd-content h2 { font-size: 26px; }
-  .rd-overlay .rd-reasoning { padding-bottom: 30px; }
-  .rd-overlay .rd-reason-list { grid-template-columns: 1fr; gap: 20px; }
   .rd-overlay .rd-inventory, .rd-overlay .rd-substitution-list { grid-template-columns: 1fr; }
   .rd-overlay .rd-ingredient-list li { font-size: 12px; }
   .rd-overlay .rd-substitutions { padding-bottom: 28px; }
