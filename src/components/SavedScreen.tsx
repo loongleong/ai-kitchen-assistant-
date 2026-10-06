@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Recipe } from '../types';
 import { RecipeCard } from './RecipeCard';
+import { FoodVisual } from './FoodVisual';
+import { DesignHeading } from './DesignUI';
+import { ArrowRight, Bookmark } from 'lucide-react';
 
 interface SavedScreenProps {
   allRecipes: Recipe[];
@@ -29,101 +32,24 @@ export const SavedScreen: React.FC<SavedScreenProps> = ({
     activeTab === 'recentlyCooked' ? recentlyCookedRecipes :
     wantToTryRecipes;
 
-  return (
-    <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
-      {/* Title & Subtitle Header */}
-      <div>
-        <h1 className="text-3xl md:text-4xl font-extrabold text-[#183B2B] tracking-tight mb-2">
-          Saved Kitchen Recipes
-        </h1>
-        <p className="text-base text-[#1C2520]/75">
-          Your bookmarked kitchen staples, recently cooked dishes, and curated collections.
-        </p>
+
+  const collection = allRecipes.filter(recipe=>recipe.estimatedCostRM<=15 && recipe.timeMinutes<=25);
+  const averageCost = collection.length ? collection.reduce((sum,recipe)=>sum+recipe.estimatedCostRM,0)/collection.length : 0;
+  const averageCalories = collection.length ? Math.round(collection.reduce((sum,recipe)=>sum+recipe.calories,0)/collection.length) : 0;
+  return <section className="design-page saved-library">
+    <DesignHeading eyebrow="GOOD MEALS, WORTH KEEPING" title="Your next favourites." description="A personal collection of meals worth coming back to."/>
+    <div className="library-feature">
+      <div className="library-copy"><span className="eyebrow">THE WEEKNIGHT EDIT</span><h2>A little time.<br/><em>A very good meal.</em></h2><p>Explore fast meals under RM15, ready in 25 minutes or less. Your kitchen tools will shape the final matches.</p>
+        <div className="library-metrics"><div><strong>{collection.length}</strong><small>recipes in the edit</small></div><div><strong>RM{averageCost.toFixed(2)}</strong><small>average meal estimate</small></div><div><strong>{averageCalories}</strong><small>average kcal per serving</small></div></div>
+        <button className="action" onClick={onCookCollection}>Explore Collection<ArrowRight size={17}/></button><small className="library-footnote">Recipe fallback estimates · servings vary by recipe</small>
       </div>
-
-      {/* Featured Collection: "Fast meals under RM15" */}
-      <div className="bg-gradient-to-r from-[#183B2B] to-[#24523D] rounded-3xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-3 max-w-xl">
-            <span className="text-xs uppercase font-bold tracking-wider text-[#A7F3D0] bg-white/10 px-3 py-1 rounded-full border border-white/15 inline-block">
-              Featured Curated Collection
-            </span>
-
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Fast meals under RM15
-            </h2>
-
-            <p className="text-xs md:text-sm text-white/80 leading-relaxed">
-              Curated for everyday weeknights. Every recipe uses fewer than 7 ingredients and is ready in under 25 minutes.
-            </p>
-
-            {/* Collection Stats per brief: 7 recipes, RM9.40 average cost, 530 average kcal */}
-            <div className="flex flex-wrap items-center gap-4 pt-2 text-xs">
-              <div className="px-3.5 py-1.5 rounded-xl bg-white/10 border border-white/15 flex items-center gap-1.5 font-medium">
-                <span className="font-bold text-[#A7F3D0]">7</span>
-                <span>recipes</span>
-              </div>
-              <div className="px-3.5 py-1.5 rounded-xl bg-white/10 border border-white/15 flex items-center gap-1.5 font-medium">
-                <span className="font-bold text-[#A7F3D0]">RM9.40</span>
-                <span>avg cost</span>
-              </div>
-              <div className="px-3.5 py-1.5 rounded-xl bg-white/10 border border-white/15 flex items-center gap-1.5 font-medium">
-                <span className="font-bold text-[#A7F3D0]">530</span>
-                <span>avg kcal</span>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={onCookCollection}
-            className="px-6 py-3 rounded-2xl bg-[#E86C38] hover:bg-[#D45924] text-white text-xs font-bold transition-all shadow-md active:scale-[0.98] cursor-pointer whitespace-nowrap self-start md:self-center"
-          >
-            Explore Collection →
-          </button>
-        </div>
-      </div>
-
-      {/* Tabs Row */}
-      <div className="flex items-center gap-2 border-b border-[#183B2B]/10 pb-3">
-        {[
-          { id: 'favourites', label: `Favourites (${savedRecipes.length || 4})` },
-          { id: 'recentlyCooked', label: 'Recently cooked (3)' },
-          { id: 'wantToTry', label: 'Want to try (4)' }
-        ].map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                isActive
-                  ? 'bg-[#183B2B] text-white shadow-xs'
-                  : 'text-[#1C2520]/70 hover:bg-[#F2EFE8] hover:text-[#183B2B]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Recipe Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentDisplayList.map((recipe) => (
-          <RecipeCard
-            key={recipe.id}
-            recipe={recipe}
-            onSelect={onSelectRecipe}
-            isSaved={savedRecipeIds.includes(recipe.id)}
-            onToggleSave={(id, e) => {
-              e.stopPropagation();
-              onToggleSave(id);
-            }}
-          />
-        ))}
-      </div>
+      <button className="library-photo" aria-label="View Ginger Chicken Rice Bowl" onClick={()=>{const recipe=allRecipes.find(item=>item.id==='ginger-chicken-rice-bowl');if(recipe)onSelectRecipe(recipe)}}><FoodVisual dishId="ginger-chicken-rice-bowl" priority/><span>A meal worth coming back to.</span></button>
     </div>
-  );
+    <div className="library-tabs" role="group" aria-label="Recipe library view">
+      {([{id:'favourites',label:'Favourites ('+savedRecipes.length+')'},{id:'recentlyCooked',label:'Recently cooked'},{id:'wantToTry',label:'Want to try ('+wantToTryRecipes.length+')'}] as const).map(tab=><button key={tab.id} aria-pressed={activeTab===tab.id} onClick={()=>setActiveTab(tab.id)}>{tab.label}</button>)}
+    </div>
+    {activeTab==='favourites' && savedRecipes.length===0 && <div className="library-empty"><Bookmark size={24}/><div><h2>Your collection starts with a favourite.</h2><p>Save a recipe to keep it here. Explore these curated suggestions while you find your first.</p></div></div>}
+    {activeTab==='recentlyCooked' && <p className="library-note">Curated preview · cooking history is not yet tracked.</p>}
+    <div className="recipe-grid">{currentDisplayList.map(recipe=><RecipeCard key={recipe.id} recipe={recipe} pantryKnown={false} onSelect={onSelectRecipe} isSaved={savedRecipeIds.includes(recipe.id)} onToggleSave={(id,event)=>{event.stopPropagation();onToggleSave(id)}}/>)}</div>
+  </section>;
 };

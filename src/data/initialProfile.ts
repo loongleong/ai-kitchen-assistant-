@@ -1,4 +1,6 @@
 import { UserKitchenProfile, UserIdentity } from '../types';
+import { DEFAULT_CUISINE_NAMES } from './cuisineCatalog';
+import { DEFAULT_EQUIPMENT_NAMES } from './equipmentCatalog';
 
 export const INITIAL_USER_PROFILE: UserKitchenProfile = {
   name: 'Alex',
@@ -16,7 +18,7 @@ export const INITIAL_USER_PROFILE: UserKitchenProfile = {
   healthPriority: 'Balanced meals',
   aiVoiceEnabled: true,
   aiVoicePersona: 'Warm Chef',
-  equipment: ['Stove', 'Frying pan', 'Rice cooker', 'Knife', 'Pot'],
+  equipment: [...DEFAULT_EQUIPMENT_NAMES],
   pantryStaples: [
     'Chicken breast',
     'Eggs',
@@ -26,7 +28,7 @@ export const INITIAL_USER_PROFILE: UserKitchenProfile = {
     'Soy sauce',
     'Cooking oil'
   ],
-  favoriteCuisines: ['Malaysian', 'Japanese', 'Chinese'],
+  favoriteCuisines: [...DEFAULT_CUISINE_NAMES],
   foodsToAvoid: ['Pork-free']
 };
 

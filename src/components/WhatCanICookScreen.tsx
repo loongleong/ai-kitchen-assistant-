@@ -1,596 +1,81 @@
 import React, { useState } from 'react';
-import { UserKitchenProfile, UserIdentity } from '../types';
+import { ArrowLeft, ArrowRight, Check, Clock3, Leaf, Minus, Plus, Users, Wallet } from 'lucide-react';
+import { UserKitchenProfile } from '../types';
+import { CookingFlowDraft, CookingQueryFilters, isValidBudget } from '../lib/cookingFlow';
+import { KitchenEquipmentScene } from './KitchenEquipmentScene';
+import { CuisineDiscovery } from './CuisineDiscovery';
+import { DesignAction, DesignHeading } from './DesignUI';
 
-export interface CookingQueryFilters {
-  cuisine: string;
-  budgetRM: number;
-  servings: number;
-  ingredients: string[];
-  equipment: string[];
-  maxTimeMinutes: number;
-  healthyMode: boolean;
-  healthPriority: string;
-}
+export type { CookingQueryFilters } from '../lib/cookingFlow';
 
 interface WhatCanICookScreenProps {
   userProfile: UserKitchenProfile;
+  draft: CookingFlowDraft;
+  onDraftChange: (draft: CookingFlowDraft) => void;
   onFindMeals: (filters: CookingQueryFilters) => void;
   onUpdateProfile: (updated: Partial<UserKitchenProfile>) => void;
   onOpenIdentitySwitch: () => void;
+  onReturnToResults: () => void;
+  onBackHome: () => void;
 }
 
+const staples = ['Soy sauce', 'Cooking oil', 'Onion', 'Ginger', 'Chilli', 'Noodles', 'Potatoes', 'Carrots', 'Broccoli', 'Cucumber'];
+const healthPriorities = ['No preference', 'Balanced meals', 'Lower calorie', 'Higher protein', 'Higher fibre', 'Lower sugar'];
+
 export const WhatCanICookScreen: React.FC<WhatCanICookScreenProps> = ({
-  userProfile,
-  onFindMeals,
-  onUpdateProfile,
-  onOpenIdentitySwitch
+  userProfile, draft, onDraftChange, onFindMeals, onOpenIdentitySwitch, onReturnToResults, onBackHome
 }) => {
-  // Step state (1 to 6)
-  const [currentStep, setCurrentStep] = useState(1);
-
-  // Form selections pre-populated from user profile to remember user!
-  const [selectedCuisine, setSelectedCuisine] = useState<string>('No preference');
-  const [budgetRM, setBudgetRM] = useState<number>(userProfile.typicalBudgetRM || 15);
-  const [servings, setServings] = useState<number>(userProfile.householdSize || 2);
-  
-  // Ingredients list (manual entry + chips)
-  const [ingredients, setIngredients] = useState<string[]>([
-    'Chicken breast',
-    'Eggs',
-    'Rice',
-    'Tomato',
-    'Garlic'
-  ]);
-  const [newIngredientInput, setNewIngredientInput] = useState('');
-
-  // Equipment selection
-  const [selectedEquipment, setSelectedEquipment] = useState<string[]>(
-    userProfile.equipment.length > 0 ? userProfile.equipment : ['Stove', 'Frying pan', 'Rice cooker']
-  );
-
-  // Cooking time
-  const [maxTime, setMaxTime] = useState<number>(30);
-
-  // Health
-  const [healthyMode, setHealthyMode] = useState<boolean>(false);
-  const [healthPriority, setHealthPriority] = useState<string>(userProfile.healthPriority || 'Balanced meals');
-
-  // Popular ingredient suggestions
-  const suggestedPantryItems = [
-    'Soy sauce', 'Cooking oil', 'Onion', 'Ginger', 'Chilli', 
-    'Noodles', 'Potatoes', 'Carrots', 'Broccoli', 'Cucumber'
-  ];
-
-  const handleAddCustomIngredient = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newIngredientInput.trim() && !ingredients.includes(newIngredientInput.trim())) {
-      setIngredients([...ingredients, newIngredientInput.trim()]);
-      setNewIngredientInput('');
-    }
+  const { filters, phase, step } = draft;
+  const refining = phase === 'refine';
+  const labels = refining ? ['Ingredients', 'Time', 'Health'] : ['Cuisine', 'Budget', 'Kitchen'];
+  const [budgetInput, setBudgetInput] = useState(String(filters.budgetRM));
+  const [ingredientInput, setIngredientInput] = useState('');
+  const validBudget = budgetInput.trim() !== '' && isValidBudget(Number(budgetInput));
+  const update = (patch: Partial<CookingQueryFilters>) => onDraftChange({ ...draft, filters: { ...filters, ...patch } });
+  const goTo = (next: number) => onDraftChange({ ...draft, step: next });
+  const toggleIngredient = (item: string) => update({ ingredients: filters.ingredients.includes(item)
+    ? filters.ingredients.filter(ingredient => ingredient !== item) : [...filters.ingredients, item] });
+  const submit = (skipHealth = false) => {
+    if (!validBudget) return;
+    onFindMeals(refining
+      ? { ...filters, stage: 'refined', ...(skipHealth ? { healthPriority: 'No preference', healthyMode: false } : {}) }
+      : { ...filters, stage: 'early', ingredients: [], maxTimeMinutes: 90, healthyMode: false, healthPriority: 'No preference' });
+    if (skipHealth) update({ healthPriority: 'No preference', healthyMode: false });
+  };
+  const addIngredient = (event: React.FormEvent) => {
+    event.preventDefault();
+    const value = ingredientInput.trim();
+    if (value && !filters.ingredients.some(item => item.toLowerCase() === value.toLowerCase())) update({ ingredients: [...filters.ingredients, value] });
+    setIngredientInput('');
   };
 
-  const handleToggleSuggestedIngredient = (item: string) => {
-    if (ingredients.includes(item)) {
-      setIngredients(ingredients.filter(i => i !== item));
-    } else {
-      setIngredients([...ingredients, item]);
-    }
-  };
-
-  const handleToggleEquipment = (tool: string) => {
-    if (selectedEquipment.includes(tool)) {
-      if (selectedEquipment.length > 1) {
-        setSelectedEquipment(selectedEquipment.filter(t => t !== tool));
-      }
-    } else {
-      setSelectedEquipment([...selectedEquipment, tool]);
-    }
-  };
-
-  const handleTriggerSearch = () => {
-    onFindMeals({
-      cuisine: selectedCuisine,
-      budgetRM,
-      servings,
-      ingredients,
-      equipment: selectedEquipment,
-      maxTimeMinutes: maxTime,
-      healthyMode,
-      healthPriority
-    });
-  };
-
-  const stepsList = [
-    { number: 1, label: 'Cuisine' },
-    { number: 2, label: 'Budget' },
-    { number: 3, label: 'Ingredients' },
-    { number: 4, label: 'Equipment' },
-    { number: 5, label: 'Time' },
-    { number: 6, label: 'Health' },
-  ];
-
-  return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      {/* Title & Subtitle Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-[#183B2B] tracking-tight mb-2">
-          What can I cook?
-        </h1>
-        <p className="text-base text-[#1C2520]/75">
-          Build a meal around your real kitchen — not the other way around.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Main Multi-Step Interactive Form Area (8 cols) */}
-        <div className="lg:col-span-8 bg-white rounded-3xl p-6 md:p-8 border border-[#183B2B]/8 shadow-xs">
-          {/* Step Progress Pills Header */}
-          <div className="flex items-center justify-between pb-6 border-b border-[#183B2B]/8 mb-8 overflow-x-auto">
-            {stepsList.map((step) => {
-              const isCurrent = currentStep === step.number;
-              const isCompleted = currentStep > step.number;
-              return (
-                <button
-                  key={step.number}
-                  onClick={() => setCurrentStep(step.number)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap cursor-pointer transition-all ${
-                    isCurrent
-                      ? 'bg-[#183B2B] text-white shadow-xs'
-                      : isCompleted
-                      ? 'bg-[#EAF2EC] text-[#183B2B]'
-                      : 'text-[#1C2520]/50 hover:bg-[#F2EFE8]'
-                  }`}
-                >
-                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
-                    isCurrent ? 'bg-white/20 text-white' : isCompleted ? 'bg-[#183B2B] text-white' : 'bg-slate-200 text-slate-600'
-                  }`}>
-                    {isCompleted ? '✓' : step.number}
-                  </span>
-                  <span>{step.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* STEP 1: Cuisine */}
-          {currentStep === 1 && (
-            <div className="space-y-6 animate-fadeIn">
-              <div>
-                <h2 className="text-xl font-bold text-[#183B2B] mb-1">Select Cuisine Style</h2>
-                <p className="text-xs text-[#1C2520]/65">Choose what you feel like having or let SavorAI decide.</p>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {['No preference', 'Chinese', 'Japanese', 'Korean', 'Malaysian', 'Italian'].map((cuisine) => {
-                  const isSelected = selectedCuisine === cuisine;
-                  return (
-                    <button
-                      key={cuisine}
-                      onClick={() => setSelectedCuisine(cuisine)}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                        isSelected
-                          ? 'border-[#183B2B] bg-[#EAF2EC] text-[#183B2B] font-bold shadow-xs'
-                          : 'border-[#183B2B]/10 hover:border-[#183B2B]/30 bg-[#FBF9F5] text-[#1C2520]'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-semibold">{cuisine}</span>
-                        {isSelected && <span className="text-xs text-[#183B2B]">✓</span>}
-                      </div>
-                      <span className="text-[11px] text-[#1C2520]/60 block">
-                        {cuisine === 'No preference' ? 'Any cuisine matches' : `${cuisine} home cooking`}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2: Budget & People */}
-          {currentStep === 2 && (
-            <div className="space-y-8 animate-fadeIn">
-              <div>
-                <h2 className="text-xl font-bold text-[#183B2B] mb-1">Set Cooking Budget & Servings</h2>
-                <p className="text-xs text-[#1C2520]/65">We adjust portion costs and grocery affordability in RM.</p>
-              </div>
-
-              {/* Budget Slider */}
-              <div className="p-6 rounded-2xl bg-[#FBF9F5] border border-[#183B2B]/8">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-semibold text-[#1C2520]">Total Meal Budget</span>
-                  <span className="text-2xl font-black text-[#183B2B] tabular-nums">
-                    RM{budgetRM}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="6"
-                  max="40"
-                  step="1"
-                  value={budgetRM}
-                  onChange={(e) => setBudgetRM(Number(e.target.value))}
-                  className="w-full h-2 bg-[#EAF2EC] rounded-lg appearance-none cursor-pointer accent-[#183B2B]"
-                />
-                <div className="flex justify-between text-[11px] text-[#1C2520]/50 mt-2">
-                  <span>RM6 (Ultra-frugal student)</span>
-                  <span>RM15 (Default sweet spot)</span>
-                  <span>RM40+ (Multi-course dinner)</span>
-                </div>
-              </div>
-
-              {/* Number of People Stepper */}
-              <div className="p-6 rounded-2xl bg-[#FBF9F5] border border-[#183B2B]/8 flex items-center justify-between">
-                <div>
-                  <span className="text-sm font-semibold text-[#1C2520] block">Cooking for how many?</span>
-                  <span className="text-xs text-[#1C2520]/60">Calculates cost per plate (≈ RM{(budgetRM / servings).toFixed(2)}/pax)</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setServings(Math.max(1, servings - 1))}
-                    className="w-9 h-9 rounded-xl bg-white border border-[#183B2B]/15 text-[#183B2B] font-bold flex items-center justify-center hover:bg-[#EAF2EC] transition-colors cursor-pointer"
-                  >
-                    -
-                  </button>
-                  <span className="text-lg font-bold text-[#183B2B] w-8 text-center tabular-nums">
-                    {servings}
-                  </span>
-                  <button
-                    onClick={() => setServings(Math.min(6, servings + 1))}
-                    className="w-9 h-9 rounded-xl bg-white border border-[#183B2B]/15 text-[#183B2B] font-bold flex items-center justify-center hover:bg-[#EAF2EC] transition-colors cursor-pointer"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3: Ingredients */}
-          {currentStep === 3 && (
-            <div className="space-y-6 animate-fadeIn">
-              <div>
-                <h2 className="text-xl font-bold text-[#183B2B] mb-1">Ingredients You Already Have</h2>
-                <p className="text-xs text-[#1C2520]/65">
-                  Type what’s in your fridge or click suggested staples to add.
-                </p>
-              </div>
-
-              {/* Manual Input Bar */}
-              <form onSubmit={handleAddCustomIngredient} className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="e.g. Tofu, Cabbage, Shrimp, Butter..."
-                  value={newIngredientInput}
-                  onChange={(e) => setNewIngredientInput(e.target.value)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-[#183B2B]/15 bg-[#FBF9F5] text-sm text-[#1C2520] focus:outline-none focus:border-[#183B2B] focus:ring-1 focus:ring-[#183B2B]"
-                />
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-[#183B2B] text-white hover:bg-[#132E22] transition-colors cursor-pointer"
-                >
-                  Add
-                </button>
-              </form>
-
-              {/* Currently Selected Active Ingredients */}
-              <div>
-                <span className="text-xs font-semibold text-[#183B2B] block mb-2">
-                  In Your Kitchen Right Now ({ingredients.length}):
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {ingredients.map((item) => (
-                    <span
-                      key={item}
-                      className="px-3 py-1.5 rounded-xl bg-[#EAF2EC] border border-[#183B2B]/15 text-xs font-medium text-[#183B2B] flex items-center gap-1.5"
-                    >
-                      <span>✓ {item}</span>
-                      <button
-                        type="button"
-                        onClick={() => setIngredients(ingredients.filter(i => i !== item))}
-                        className="text-[#183B2B]/60 hover:text-[#E86C38] cursor-pointer ml-1"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Quick-Tap Suggested Staples */}
-              <div className="pt-4 border-t border-[#183B2B]/8">
-                <span className="text-xs font-semibold text-[#1C2520]/70 block mb-2">
-                  Tap to add common items:
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {suggestedPantryItems.map((item) => {
-                    const isAdded = ingredients.includes(item);
-                    return (
-                      <button
-                        type="button"
-                        key={item}
-                        onClick={() => handleToggleSuggestedIngredient(item)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
-                          isAdded
-                            ? 'bg-[#183B2B] text-white border-[#183B2B]'
-                            : 'bg-[#FBF9F5] text-[#1C2520]/80 border-[#183B2B]/10 hover:border-[#183B2B]/30'
-                        }`}
-                      >
-                        {isAdded ? `✓ ${item}` : `+ ${item}`}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 4: Equipment */}
-          {currentStep === 4 && (
-            <div className="space-y-6 animate-fadeIn">
-              <div>
-                <h2 className="text-xl font-bold text-[#183B2B] mb-1">Kitchen Equipment Owned</h2>
-                <p className="text-xs text-[#1C2520]/65">We only recommend dishes you can cook with your actual gear.</p>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {[
-                  'Stove',
-                  'Frying pan',
-                  'Rice cooker',
-                  'Air fryer',
-                  'Pot',
-                  'Knife',
-                  'Blender',
-                  'Microwave',
-                  'Oven'
-                ].map((tool) => {
-                  const isOwned = selectedEquipment.includes(tool);
-                  return (
-                    <button
-                      key={tool}
-                      onClick={() => handleToggleEquipment(tool)}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                        isOwned
-                          ? 'border-[#183B2B] bg-[#EAF2EC] text-[#183B2B] font-bold shadow-xs'
-                          : 'border-[#183B2B]/10 bg-[#FBF9F5] text-[#1C2520]/60'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-semibold">{tool}</span>
-                        <span>{isOwned ? '✓' : '+'}</span>
-                      </div>
-                      <span className="text-[11px] text-[#1C2520]/60">
-                        {isOwned ? 'Available to use' : 'Not owned'}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 5: Cooking Time */}
-          {currentStep === 5 && (
-            <div className="space-y-6 animate-fadeIn">
-              <div>
-                <h2 className="text-xl font-bold text-[#183B2B] mb-1">How Much Time Do You Have?</h2>
-                <p className="text-xs text-[#1C2520]/65">Filter meals by total active prep and cooking duration.</p>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {[
-                  { label: 'Under 15 min', minutes: 15, tag: 'Flash quick' },
-                  { label: 'Under 30 min', minutes: 30, tag: 'Standard dinner' },
-                  { label: 'Under 45 min', minutes: 45, tag: 'Hearty meal' },
-                  { label: 'Any time', minutes: 90, tag: 'Weekend cooking' }
-                ].map((item) => {
-                  const isSelected = maxTime === item.minutes;
-                  return (
-                    <button
-                      key={item.minutes}
-                      onClick={() => setMaxTime(item.minutes)}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                        isSelected
-                          ? 'border-[#183B2B] bg-[#EAF2EC] text-[#183B2B] font-bold shadow-xs'
-                          : 'border-[#183B2B]/10 bg-[#FBF9F5] text-[#1C2520]'
-                      }`}
-                    >
-                      <span className="text-sm font-bold block mb-1">{item.label}</span>
-                      <span className="text-[11px] text-[#1C2520]/60">{item.tag}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 6: Health & Priorities */}
-          {currentStep === 6 && (
-            <div className="space-y-6 animate-fadeIn">
-              <div>
-                <h2 className="text-xl font-bold text-[#183B2B] mb-1">Health & Nutrition Priority</h2>
-                <p className="text-xs text-[#1C2520]/65">
-                  Calories remain the primary metric, without labeling food as "good" or "bad".
-                </p>
-              </div>
-
-              {/* Healthy Mode Toggle */}
-              <div className="p-5 rounded-2xl bg-[#EAF2EC] border border-[#183B2B]/15 flex items-center justify-between">
-                <div>
-                  <span className="text-sm font-bold text-[#183B2B] block">Healthy Mode</span>
-                  <span className="text-xs text-[#1C2520]/75">
-                    Prioritises lighter oils, extra fiber, and smarter cooking methods.
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setHealthyMode(!healthyMode)}
-                  className={`w-13 h-7 rounded-full transition-colors relative cursor-pointer ${
-                    healthyMode ? 'bg-[#183B2B]' : 'bg-slate-300'
-                  }`}
-                >
-                  <div className={`w-5 h-5 rounded-full bg-white transition-transform absolute top-1 ${
-                    healthyMode ? 'right-1' : 'left-1'
-                  }`} />
-                </button>
-              </div>
-
-              {/* Priority Selectors */}
-              <div>
-                <span className="text-xs font-semibold text-[#183B2B] block mb-2">
-                  Nutritional Goal Priority:
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  {[
-                    'Balanced meals',
-                    'Lower calorie',
-                    'Higher protein',
-                    'Lower sugar',
-                    'Higher fibre'
-                  ].map((p) => {
-                    const isSelected = healthPriority === p;
-                    return (
-                      <button
-                        key={p}
-                        onClick={() => setHealthPriority(p)}
-                        className={`px-3.5 py-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer text-left ${
-                          isSelected
-                            ? 'bg-[#183B2B] text-white border-[#183B2B]'
-                            : 'bg-[#FBF9F5] text-[#1C2520] border-[#183B2B]/10 hover:border-[#183B2B]/30'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Stepper Navigation Buttons */}
-          <div className="pt-8 mt-8 border-t border-[#183B2B]/8 flex items-center justify-between">
-            <button
-              onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-              disabled={currentStep === 1}
-              className={`px-4 py-2 text-xs font-semibold rounded-xl ${
-                currentStep === 1
-                  ? 'text-slate-300 cursor-not-allowed'
-                  : 'text-[#1C2520] hover:bg-[#F2EFE8] cursor-pointer'
-              }`}
-            >
-              ← Previous
-            </button>
-
-            <div className="flex items-center gap-3">
-              {currentStep < 6 ? (
-                <button
-                  onClick={() => setCurrentStep(currentStep + 1)}
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#183B2B] hover:bg-[#132E22] transition-colors cursor-pointer"
-                >
-                  Continue →
-                </button>
-              ) : (
-                <button
-                  onClick={handleTriggerSearch}
-                  className="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[#E86C38] hover:bg-[#D45924] shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center gap-2"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <circle cx="11" cy="11" r="8"/>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                  </svg>
-                  <span>Find meals I can cook</span>
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Persistent Side Panel: "Your Kitchen Profile" (4 cols) */}
-        <div className="lg:col-span-4 bg-[#FBF9F5] rounded-3xl p-6 border border-[#183B2B]/10 shadow-xs space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-[#183B2B]/10">
-            <div>
-              <span className="text-xs uppercase tracking-wider text-[#183B2B] font-bold block">
-                Your Kitchen Profile
-              </span>
-              <span className="text-sm font-bold text-[#1C2520]">
-                {userProfile.name} ({userProfile.identity})
-              </span>
-            </div>
-
-            <button
-              onClick={onOpenIdentitySwitch}
-              className="text-[11px] font-semibold text-[#E86C38] hover:underline cursor-pointer"
-            >
-              Switch Role
-            </button>
-          </div>
-
-          <div className="space-y-4 text-xs">
-            {/* Identity badge explanation */}
-            <div className="p-3.5 rounded-2xl bg-[#EAF2EC] border border-[#183B2B]/10">
-              <span className="font-bold text-[#183B2B] block mb-1">
-                Remembers your {userProfile.identity} mode:
-              </span>
-              <p className="text-[#1C2520]/75 leading-relaxed">
-                {userProfile.identity === 'Student' && 'Prioritises under RM15, fewer ingredients, single-pan cooking, fast cleanups.'}
-                {userProfile.identity === 'Family / Household' && 'Scales batch meals with lowest cost per serving and balanced nutrition.'}
-                {userProfile.identity === 'Fitness User' && 'Prioritises 35g+ protein density and lean cooking swaps.'}
-                {userProfile.identity === 'Beginner Cook' && 'Detailed visual doneness cues, failsafe swaps, and forgiving cook times.'}
-                {userProfile.identity === 'General User' && 'Balanced culinary recommendations with high flavour and comfort.'}
-                {userProfile.identity === 'I’m not sure yet' && 'Adapts as you save recipes and mark fridge ingredients.'}
-              </p>
-            </div>
-
-            {/* Usual Budget */}
-            <div className="flex items-center justify-between py-2 border-b border-[#183B2B]/8">
-              <span className="text-[#1C2520]/65 font-medium">Usual Budget</span>
-              <span className="font-bold text-[#183B2B]">RM{userProfile.typicalBudgetRM}/meal</span>
-            </div>
-
-            {/* Kitchen Equipment */}
-            <div className="py-2 border-b border-[#183B2B]/8">
-              <span className="text-[#1C2520]/65 font-medium block mb-1.5">Owned Equipment:</span>
-              <div className="flex flex-wrap gap-1.5">
-                {userProfile.equipment.map((tool) => (
-                  <span key={tool} className="px-2 py-0.5 rounded-md bg-white border border-[#183B2B]/10 text-[11px] text-[#1C2520]/80">
-                    {tool}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Cuisine Preference */}
-            <div className="flex items-center justify-between py-2 border-b border-[#183B2B]/8">
-              <span className="text-[#1C2520]/65 font-medium">Cuisine Preference</span>
-              <span className="font-semibold text-[#1C2520]">{userProfile.favoriteCuisines.join(', ')}</span>
-            </div>
-
-            {/* Health Goal */}
-            <div className="flex items-center justify-between py-2 border-b border-[#183B2B]/8">
-              <span className="text-[#1C2520]/65 font-medium">Health Goal</span>
-              <span className="font-semibold text-[#183B2B]">{userProfile.healthGoal}</span>
-            </div>
-
-            {/* Avoided Foods */}
-            <div className="flex items-center justify-between py-2">
-              <span className="text-[#1C2520]/65 font-medium">Diet Focus</span>
-              <span className="font-semibold text-[#1C2520]">{userProfile.foodsToAvoid.join(', ')}</span>
-            </div>
-          </div>
-
-          <div className="pt-2">
-            <button
-              onClick={handleTriggerSearch}
-              className="w-full py-3 rounded-2xl bg-[#183B2B] hover:bg-[#132E22] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <span>Apply & Find Meals Now</span>
-              <span>→</span>
-            </button>
-          </div>
-        </div>
-      </div>
+  return <div className="design-page cook-flow">
+    <div className="journey-bar"><span className="journey-title">YOUR NEXT MEAL STARTS HERE</span><nav className="journey-steps" aria-label={refining?'Refinement progress':'Kitchen setup progress'}>{labels.map((label,index)=><button type="button" key={label} aria-current={step===index+1?'step':undefined} className={step===index+1?'current':step>index+1?'complete':''} disabled={!validBudget&&index>1} onClick={()=>goTo(index+1)}><span>{step>index+1?<Check size={12}/>:String(index+1).padStart(2,'0')}</span>{label}{index<2&&<i/>}</button>)}{!refining&&<><i/><button disabled><span>04</span>Your matches</button></>}</nav><span className="journey-note"><Leaf size={13}/>A little less waste. A lot more possibility.</span></div>
+    <div className="flow-profile-strip"><button type="button" className="back-link" onClick={()=>refining&&step===1?onReturnToResults():step>1?goTo(step-1):onBackHome()}><ArrowLeft size={15}/>{refining&&step===1?'Back to meals':step===1?'Back to Home':'Back'}</button><button className="text-button" onClick={onOpenIdentitySwitch}>{userProfile.name} · {userProfile.identity} <span>Switch role</span></button></div>
+    <div className="flow-scene" key={phase+'-'+step}>
+    {!refining&&step===1&&<CuisineDiscovery selected={filters.cuisine} onSelect={cuisine=>update({cuisine})} onNext={()=>goTo(2)}/>}
+    {!refining&&step===2&&<section className="center-step budget-step">
+      <DesignHeading eyebrow="A LITTLE PLANNING, A LOT OF POSSIBILITY" title="Good food. Your budget." description="Set a comfortable total. We’ll make the most of it."/>
+      <div className="budget-surface"><label className="eyebrow" htmlFor="meal-budget">TOTAL MEAL BUDGET</label><div className="budget-input"><span>RM</span><input id="meal-budget" type="number" inputMode="decimal" min="1" step="0.01" value={budgetInput} aria-invalid={!validBudget} aria-describedby="meal-budget-help" onChange={event=>{setBudgetInput(event.target.value);const value=Number(event.target.value);if(event.target.value.trim()&&isValidBudget(value))update({budgetRM:value})}}/></div>
+      <div className="preset-row">{[10,20,30,50].map(value=><button type="button" className={Number(budgetInput)===value?'select-chip selected':'select-chip'} key={value} aria-pressed={Number(budgetInput)===value} onClick={()=>{setBudgetInput(String(value));update({budgetRM:value})}}>RM{value}</button>)}</div>
+      <p id="meal-budget-help" className={validBudget?'subtle':'cook-error'}>{validBudget?'Your total meal budget, not a per-person limit. RM1 or more, with no upper limit.':'Enter a valid amount of RM1 or more.'}</p>
+      <div className="servings-row"><div><Users size={20}/><span>Cooking for</span></div><div className="stepper"><button type="button" aria-label="Fewer servings" disabled={filters.servings<=1} onClick={()=>update({servings:Math.max(1,filters.servings-1)})}><Minus size={16}/></button><output aria-label="Servings" aria-live="polite">{filters.servings}</output><button type="button" aria-label="More servings" disabled={filters.servings>=6} onClick={()=>update({servings:Math.min(6,filters.servings+1)})}><Plus size={16}/></button></div></div>
+      <div className="per-person"><Wallet size={17}/><span>Approx. <strong>RM{(validBudget?Number(budgetInput)/filters.servings:0).toFixed(2)}</strong> per person in your budget</span></div></div>
+      <div className="step-footer"><span>Beautiful meals don’t need a big budget.</span><DesignAction onClick={()=>goTo(3)} disabled={!validBudget}>Meet your kitchen</DesignAction></div>
+    </section>}
+    {!refining&&step===3&&<section className="kitchen-step panoramic-step"><DesignHeading eyebrow="YOUR KITCHEN, DISCOVERED" title="A kitchen full of possibilities." description="Explore your space. Select the tools you own. We’ll take care of the inspiration."/><KitchenEquipmentScene selectedEquipment={filters.equipment} onToggle={tool=>update({equipment:filters.equipment.includes(tool)?filters.equipment.filter(item=>item!==tool):[...filters.equipment,tool]})} onNext={()=>submit()} disabled={!validBudget}/></section>}
+    {refining&&<section className="center-step refine-step">
+      <div className="refine-context"><span>{filters.cuisine}</span><span>RM{filters.budgetRM.toFixed(2)} budget</span><span>{filters.servings} servings</span><span>{filters.equipment.length} tools</span><button type="button" onClick={()=>onDraftChange({...draft,phase:'setup',step:1})}>Edit first choices <ArrowRight size={13}/></button></div>
+      <DesignHeading eyebrow="REFINE YOUR MATCH · COMPLETELY OPTIONAL" title={step===1?'What do you already have?':step===2?'How much time do you have?':'Want us to optimise for anything?'} description={step===1?'A few ingredients can bring your next meal into focus. Check the starting list and make it yours.':step===2?'A quick bite or time to savour the process.':'Just a preference, not a rule. All good food belongs here.'}/>
+      {step===1&&<><form onSubmit={addIngredient} className="cook-ingredient-form"><input type="text" aria-label="Add an ingredient" placeholder="Add an ingredient…" value={ingredientInput} onChange={event=>setIngredientInput(event.target.value)} onKeyDown={event=>{if(event.key==='Enter'&&event.nativeEvent.isComposing)event.preventDefault()}}/><button type="submit" aria-label="Add ingredient"><Plus size={18}/></button></form>
+      <h3 className="cook-tray-heading">In your kitchen right now ({filters.ingredients.length})</h3><div className="cook-ingredient-chips">{filters.ingredients.map(item=><span key={item}><Check size={13}/>{item}<button type="button" aria-label={'Remove '+item} onClick={()=>toggleIngredient(item)}>×</button></span>)}</div>
+      {filters.ingredients.length===0&&<p className="cook-empty-note">An empty pantry is fine. Browse meals with a complete shopping list.</p>}
+      <div className="cook-staples"><h3>Tap to add common items</h3><div>{staples.map(item=><button type="button" className={filters.ingredients.includes(item)?'select-chip selected':'select-chip'} key={item} aria-pressed={filters.ingredients.includes(item)} onClick={()=>toggleIngredient(item)}>{filters.ingredients.includes(item)?<Check size={13}/>:<Plus size={13}/>} {item}</button>)}</div></div></>}
+      {step===2&&<div className="time-options">{[15,30,45,60,90].map(minutes=><button type="button" key={minutes} className={filters.maxTimeMinutes===minutes?'time-option selected':'time-option'} aria-pressed={filters.maxTimeMinutes===minutes} onClick={()=>update({maxTimeMinutes:minutes})}><Clock3 size={22}/><strong>{minutes===90?'No rush':minutes}</strong><span>{minutes===90?'Any cooking time':'minutes'}</span></button>)}</div>}
+      {step===3&&<><div className="health-options">{healthPriorities.map(priority=><button type="button" className={filters.healthPriority===priority?'health-option selected':'health-option'} key={priority} aria-pressed={filters.healthPriority===priority} onClick={()=>update({healthPriority:priority})}><Leaf size={20}/><span><strong>{priority}</strong><small>{priority==='No preference'?'Let flavour lead the way':'A little guidance for your next meal.'}</small></span><span className="selection-circle">{filters.healthPriority===priority&&<Check size={13}/>}</span></button>)}</div>
+      <button type="button" className="cook-health-toggle" aria-pressed={filters.healthyMode} onClick={()=>update({healthyMode:!filters.healthyMode})}><Leaf size={18}/><span><strong>Consider the healthier versions</strong><small>Use each recipe’s lighter nutrition profile when ranking.</small></span><span className={filters.healthyMode?'cook-toggle is-on':'cook-toggle'} aria-hidden="true"><i/></span></button></>}
+      <div className="step-footer"><button className="text-button" onClick={()=>step>1?goTo(step-1):onReturnToResults()}><ArrowLeft size={15}/>{step===1?'Back to meals':'Previous'}</button><div className="refine-actions">{step===3&&<button type="button" className="text-button" onClick={()=>submit(true)}>Skip health</button>}<DesignAction onClick={()=>step<3?goTo(step+1):submit()} disabled={!validBudget}>{step===3?'Reveal my matches':'Continue'}</DesignAction></div></div>
+    </section>}
     </div>
-  );
+  </div>;
 };

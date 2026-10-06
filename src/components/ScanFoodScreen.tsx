@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { DishIllustration } from './DishIllustration';
+import { Camera } from 'lucide-react';
+import { DesignHeading } from './DesignUI';
 import { FoodScanResult, UserKitchenProfile } from '../types';
 
 interface ScanFoodScreenProps {
@@ -102,100 +105,60 @@ export const ScanFoodScreen: React.FC<ScanFoodScreenProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="premium-page design-support scan-screen max-w-7xl mx-auto px-6 py-8">
       {/* Title & Subtitle Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-[#183B2B] tracking-tight mb-2">
-          Scan your food
-        </h1>
-        <p className="text-base text-[#1C2520]/75">
-          Take a photo and get an estimated calorie and nutrition breakdown.
-        </p>
-      </div>
-
+      <DesignHeading eyebrow="A CLOSER LOOK AT YOUR PLATE" title="Food, in a little more detail." description="Explore sample plate estimates. Adjust the portions and keep a daily food log."/>
       {/* Two-Column Structure */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Upload / Camera Area (6 cols) */}
         <div className="lg:col-span-6 space-y-6">
-          <div className="bg-white rounded-3xl p-6 md:p-8 border border-[#183B2B]/8 shadow-xs">
-            {/* Viewfinder Camera Simulation */}
-            <div className="relative aspect-[4/3] rounded-2xl bg-gradient-to-b from-[#1C2520] to-[#121A16] border-2 border-dashed border-[#183B2B]/30 flex flex-col items-center justify-center p-6 overflow-hidden">
-              {/* Corner Viewfinder brackets */}
-              <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-white/60 rounded-tl" />
-              <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-white/60 rounded-tr" />
-              <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-white/60 rounded-bl" />
-              <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-white/60 rounded-br" />
-
-              {/* Scanning visual indicator */}
-              {isAnalyzing ? (
-                <div className="flex flex-col items-center text-center animate-pulse">
-                  <div className="w-12 h-12 rounded-full border-2 border-[#10B981] border-t-transparent animate-spin mb-3" />
-                  <span className="text-sm font-bold text-white">Analyzing food components...</span>
-                  <span className="text-xs text-white/60 mt-1">Recognizing portions & cooking style</span>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-[#EAF2EC]/10 border border-white/20 flex items-center justify-center text-white mb-4">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                      <circle cx="12" cy="13" r="4"/>
-                    </svg>
-                  </div>
-                  <span className="text-sm font-bold text-white block mb-1">
-                    Point camera or upload a dish photo
-                  </span>
-                  <p className="text-xs text-white/70 max-w-xs">
-                    Works for home-cooked meals, hawker stalls, and restaurant plates.
-                  </p>
-                </div>
-              )}
-
-              {/* Current detected label badge */}
-              <div className="absolute bottom-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl text-xs text-white font-medium flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#10B981]" />
-                <span className="truncate max-w-[240px]">{selectedScan.mealName}</span>
-              </div>
+          <div className="premium-surface rounded-3xl p-6 md:p-8 border premium-border shadow-xs">
+            <div className="premium-scan-viewfinder aspect-[4/3]">
+              <DishIllustration dishId={selectedScan.mealName === PRESET_MEALS[0].mealName ? 'scan-chicken-chop' : selectedScan.mealName === PRESET_MEALS[1].mealName ? 'scan-nasi-lemak' : 'scan-teriyaki'} className="w-full h-full" showSteam={false} />
+              <div className="premium-scan-intro"><span><Camera size={14} aria-hidden="true" /></span><span>Sample dish preview</span></div>
+              <div className="absolute bottom-5 left-5 right-5 rounded-xl border border-white/20 bg-[#183B2B]/70 px-4 py-3 backdrop-blur-md text-white text-xs">{selectedScan.mealName}</div>
+              {isAnalyzing && <div className="premium-scan-analysis"><div className="w-9 h-9 rounded-full border-2 border-white/40 border-t-white animate-spin mb-4" /><span className="text-sm text-white">Loading sample plate…</span><span className="text-xs text-white/60 mt-2">Preparing the sample portion breakdown</span></div>}
             </div>
 
             {/* Buttons: Take Photo / Upload Image */}
             <div className="grid grid-cols-2 gap-3 mt-6">
               <button 
                 onClick={() => handleSelectPreset(PRESET_MEALS[0])}
-                className="py-3 px-4 rounded-xl bg-[#183B2B] hover:bg-[#132E22] text-white text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                className="py-3 px-4 rounded-xl premium-solid premium-hover-solid text-white text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                   <circle cx="12" cy="13" r="4"/>
                 </svg>
-                <span>Take Photo</span>
+                <span>Preview chicken plate</span>
               </button>
 
               <button 
                 onClick={() => handleSelectPreset(PRESET_MEALS[1])}
-                className="py-3 px-4 rounded-xl bg-[#F2EFE8] hover:bg-[#EAF2EC] text-[#183B2B] text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                className="py-3 px-4 rounded-xl premium-inset premium-hover-surface premium-ink text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                   <polyline points="17 8 12 3 7 8"/>
                   <line x1="12" y1="3" x2="12" y2="15"/>
                 </svg>
-                <span>Upload Image</span>
+                <span>Preview nasi lemak</span>
               </button>
             </div>
 
             {/* Mandatory Note per brief: "Photo-based nutrition is an estimate. You can correct portions before saving." */}
-            <div className="mt-5 p-3.5 rounded-2xl bg-[#FFF8F5] border border-[#E86C38]/20 flex items-start gap-2.5">
-              <span className="text-[#E86C38] font-bold text-xs mt-0.5">ℹ</span>
-              <p className="text-xs text-[#1C2520]/80 leading-relaxed font-medium">
+            <div className="mt-5 p-3.5 rounded-2xl premium-warm border border-[#E86C38]/20 flex items-start gap-2.5">
+              <span className="premium-accent font-bold text-xs mt-0.5">ℹ</span>
+              <p className="text-xs premium-muted leading-relaxed font-medium">
                 Photo-based nutrition is an estimate. You can correct portions before saving.
               </p>
             </div>
           </div>
 
           {/* Quick preset selector to test realistic recognition scenarios */}
-          <div className="bg-white rounded-3xl p-5 border border-[#183B2B]/8 shadow-xs">
-            <span className="text-xs font-bold text-[#183B2B] block mb-2.5">
-              Try sample detected dishes:
+          <div className="premium-surface rounded-3xl p-5 border premium-border shadow-xs">
+            <span className="text-xs font-bold premium-ink block mb-2.5">
+              Explore sample dishes:
             </span>
             <div className="space-y-2">
               {PRESET_MEALS.map((preset) => (
@@ -204,12 +167,12 @@ export const ScanFoodScreen: React.FC<ScanFoodScreenProps> = ({
                   onClick={() => handleSelectPreset(preset)}
                   className={`w-full p-2.5 rounded-xl border text-left text-xs transition-all flex items-center justify-between cursor-pointer ${
                     selectedScan.mealName === preset.mealName
-                      ? 'bg-[#EAF2EC] border-[#183B2B] font-bold text-[#183B2B]'
-                      : 'bg-[#FBF9F5] border-[#183B2B]/10 hover:border-[#183B2B]/30 text-[#1C2520]'
+                      ? 'premium-tint premium-border font-bold premium-ink'
+                      : 'premium-inset premium-border premium-hover-border premium-ink'
                   }`}
                 >
                   <span className="truncate">{preset.mealName}</span>
-                  <span className="text-[#183B2B] font-semibold shrink-0 ml-2">≈ {preset.totalCalories} kcal</span>
+                  <span className="premium-ink font-semibold shrink-0 ml-2">≈ {preset.totalCalories} kcal</span>
                 </button>
               ))}
             </div>
@@ -217,19 +180,19 @@ export const ScanFoodScreen: React.FC<ScanFoodScreenProps> = ({
         </div>
 
         {/* Right Column: Analysis Preview (6 cols) */}
-        <div className="lg:col-span-6 bg-white rounded-3xl p-6 md:p-8 border border-[#183B2B]/8 shadow-xs space-y-6">
+        <div className="lg:col-span-6 premium-surface rounded-3xl p-6 md:p-8 border premium-border shadow-xs space-y-6">
           {/* Detected Meal Name */}
-          <div className="pb-4 border-b border-[#183B2B]/8">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#183B2B] block mb-1">
-              Detected Meal Analysis
+          <div className="pb-4 border-b premium-border">
+            <span className="text-[11px] font-bold uppercase tracking-wider premium-ink block mb-1">
+              SAMPLE PLATE ANALYSIS
             </span>
-            <h2 className="text-2xl font-extrabold text-[#183B2B] tracking-tight">
+            <h2 className="text-2xl font-extrabold premium-ink tracking-tight">
               {selectedScan.mealName}
             </h2>
           </div>
 
           {/* Calories Most Visually Prominent Value */}
-          <div className="p-6 rounded-3xl bg-[#183B2B] text-white flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+          <div className="premium-scan-energy premium-hud p-6 rounded-3xl text-white flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
             <div>
               <span className="text-xs text-white/70 font-medium block mb-1">Estimated Energy</span>
               <div className="flex items-baseline gap-2">
@@ -238,7 +201,7 @@ export const ScanFoodScreen: React.FC<ScanFoodScreenProps> = ({
                 </span>
                 <span className="text-sm font-semibold text-white/80">kcal</span>
               </div>
-              <span className="text-[11px] text-[#A7F3D0] mt-1 block">
+              <span className="text-[11px] premium-positive mt-1 block">
                 Adjusted for current portion estimates
               </span>
             </div>
@@ -263,39 +226,41 @@ export const ScanFoodScreen: React.FC<ScanFoodScreenProps> = ({
           {/* Food Breakdown with "Adjust portions" */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-sm text-[#183B2B]">Detected Components</h3>
+              <h3 className="font-bold text-sm premium-ink">Plate components</h3>
               <button
                 onClick={() => setIsAdjusting(!isAdjusting)}
-                className="text-xs font-semibold text-[#E86C38] hover:underline cursor-pointer"
+                className="text-xs font-semibold premium-accent hover:underline cursor-pointer"
               >
                 {isAdjusting ? 'Done Adjusting' : 'Adjust Portions'}
               </button>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="premium-scan-components space-y-2.5">
               {itemsBreakdown.map((item, idx) => (
                 <div
                   key={item.name}
-                  className="p-3.5 rounded-2xl bg-[#FBF9F5] border border-[#183B2B]/6 flex items-center justify-between gap-3 text-xs"
+                  className="p-3.5 rounded-2xl premium-inset border premium-border flex items-center justify-between gap-3 text-xs"
                 >
                   <div className="flex-1">
-                    <span className="font-bold text-[#1C2520] block">{item.name}</span>
-                    <span className="text-[#1C2520]/60 text-[11px]">{item.portion}</span>
+                    <span className="font-bold premium-ink block">{item.name}</span>
+                    <span className="premium-muted text-[11px]">{item.portion}</span>
                   </div>
 
                   {/* Interactive portion adjuster controls */}
                   {isAdjusting ? (
-                    <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-xl border border-[#183B2B]/15">
+                    <div className="flex items-center gap-2 premium-surface px-2 py-1 rounded-xl border premium-border">
                       <button
+                        aria-label={'Reduce '+item.name+' portion'}
                         onClick={() => handleAdjustPortion(idx, -0.5)}
-                        className="w-6 h-6 rounded-lg bg-[#F2EFE8] flex items-center justify-center text-[#183B2B] font-bold cursor-pointer hover:bg-[#EAF2EC]"
+                        className="w-6 h-6 rounded-lg premium-inset flex items-center justify-center premium-ink font-bold cursor-pointer premium-hover-surface"
                       >
                         -
                       </button>
-                      <span className="font-bold text-[#183B2B] w-8 text-center">{item.amount}</span>
+                      <span className="font-bold premium-ink w-8 text-center">{item.amount}</span>
                       <button
+                        aria-label={'Increase '+item.name+' portion'}
                         onClick={() => handleAdjustPortion(idx, 0.5)}
-                        className="w-6 h-6 rounded-lg bg-[#F2EFE8] flex items-center justify-center text-[#183B2B] font-bold cursor-pointer hover:bg-[#EAF2EC]"
+                        className="w-6 h-6 rounded-lg premium-inset flex items-center justify-center premium-ink font-bold cursor-pointer premium-hover-surface"
                       >
                         +
                       </button>
@@ -303,10 +268,10 @@ export const ScanFoodScreen: React.FC<ScanFoodScreenProps> = ({
                   ) : null}
 
                   <div className="text-right">
-                    <span className="font-bold text-[#183B2B] tabular-nums block">
+                    <span className="font-bold premium-ink tabular-nums block">
                       {item.calories} kcal
                     </span>
-                    <span className="text-[10px] text-[#1C2520]/50">
+                    <span className="text-[10px] premium-faint">
                       {Math.round((item.calories / currentTotalCalories) * 100)}% of plate
                     </span>
                   </div>
@@ -319,7 +284,7 @@ export const ScanFoodScreen: React.FC<ScanFoodScreenProps> = ({
           <div className="pt-2">
             <button
               onClick={handleSave}
-              className="w-full py-3.5 rounded-2xl bg-[#183B2B] hover:bg-[#132E22] active:scale-[0.98] text-white font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3.5 rounded-2xl premium-solid premium-hover-solid active:scale-[0.98] text-white font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>

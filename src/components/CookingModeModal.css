@@ -1,0 +1,270 @@
+.cooking-mode.savor-design {
+  position: fixed;
+  inset: 0;
+  width: calc(100% - 32px);
+  max-width: 1440px;
+  height: calc(100dvh - 32px);
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  border: 1px solid #ffffff20;
+  background: #143c2d;
+  color: #f8f8ef;
+  border-radius: 28px;
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+.cooking-mode.savor-design[open] {
+  display: flex;
+  flex-direction: column;
+}
+.cooking-mode::backdrop {
+  background: #102c26cc;
+  backdrop-filter: blur(10px);
+}
+.savor-design .cooking-bar {
+  flex-shrink: 0;
+  align-items: center;
+  border-bottom: 1px solid #ffffff18;
+  position: sticky;
+  top: 0;
+  background: #143c2df5;
+  z-index: 3;
+  min-height: 76px;
+}
+.savor-design .cooking-bar h2 {
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+.savor-design .cooking-health-badge {
+  font-size: 10px;
+  background: #ffffff12;
+  border: 1px solid #ffffff20;
+  border-radius: 20px;
+  padding: 6px 10px;
+}
+.savor-design .cooking-bar .back-link {
+  min-height: 44px;
+  color: #f8f8ef;
+}
+.savor-design .voice-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #ffffff28;
+  border-radius: 24px;
+  padding: 10px 14px;
+  min-height: 44px;
+  font-size: 11px;
+  background: #ffffff08;
+}
+.savor-design .voice-toggle[aria-pressed=true] {
+  color: #e8dab5;
+  background: #ffffff12;
+}
+.savor-design .cooking-layout {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+}
+.savor-design .cooking-stage {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.savor-design .cooking-scene-photo {
+  position: absolute;
+  inset: 0;
+  animation: design-reveal .4s both;
+}
+.savor-design .cooking-scene-photo>.food-visual {
+  height: 100%;
+}
+.savor-design .cooking-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg,#0e231cf2,transparent 60%,#0e231c88);
+  pointer-events: none;
+}
+.savor-design .stage-tag, .savor-design .stage-bottom, .savor-design .stage-note {
+  z-index: 1;
+}
+.savor-design .cooking-instructions {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  gap: 20px;
+  padding: 32px 36px;
+  background: radial-gradient(ellipse at top right,#385b3335,transparent 65%);
+}
+.savor-design .cooking-instructions h1 {
+  font-size: clamp(30px,3vw,42px);
+  line-height: 1.12;
+  margin: 0;
+  animation: design-reveal .4s both;
+}
+.savor-design .cooking-instructions p {
+  margin: 0;
+  line-height: 1.7;
+  color: #dbe4d8;
+}
+.savor-design .cooking-instructions .step-instruction {
+  font-size: 16px;
+  color: #f3f5ea;
+}
+.savor-design .cooking-cue p, .savor-design .cooking-tip p {
+  margin-top: 9px;
+  font-size: 13px;
+}
+.savor-design .cooking-tip svg {
+  flex-shrink: 0;
+  color: #e6c498;
+}
+.savor-design .cooking-voice {
+  border-top: 1px solid #ffffff18;
+  padding-top: 12px;
+  font-size: 12px;
+}
+.savor-design .cooking-voice summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  min-height: 44px;
+  color: #cad8c7;
+}
+.savor-design .cooking-voice small {
+  display: block;
+  color: #b7c6b3;
+  margin-top: 8px;
+}
+.savor-design .cooking-progress span {
+  transition: background .25s;
+}
+.savor-design .timer {
+  padding-top: 8px;
+}
+.savor-design .timer strong {
+  font-variant-numeric: tabular-nums;
+  font-size: 46px;
+  color: #f8f8ef;
+}
+.savor-design .timer button {
+  min-width: 48px;
+  min-height: 48px;
+  display: grid;
+  place-items: center;
+  transition: background .2s,transform .2s;
+}
+.savor-design .timer button:hover {
+  background: #ffffff15;
+  transform: translateY(-2px);
+}
+.savor-design .cooking-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid #ffffff18;
+  padding-top: 20px;
+}
+.savor-design .cooking-controls .text-button {
+  color: #eff1e6;
+  min-height: 44px;
+}
+.savor-design .cooking-controls button:disabled {
+  opacity: .35;
+}
+.savor-design .cooking-instructions>.subtle {
+  color: #a8b9a4;
+  font-size: 10px;
+}
+@media(max-width:900px) {
+  .savor-design .cooking-layout {
+    grid-template-columns: 42% 58%;
+  }
+  .savor-design .cooking-instructions {
+    padding: 24px;
+  }
+  .savor-design .cooking-bar h2 {
+    max-width: 35%;
+    font-size: 12px;
+  }
+  .savor-design .cooking-health-badge {
+    display: none;
+  }
+  .savor-design .stage-bottom p {
+    font-size: 32px;
+  }
+}
+@media(max-width:700px) {
+  .cooking-mode.savor-design {
+    width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+    border: 0;
+    overflow: auto;
+  }
+  .cooking-mode.savor-design[open] {
+    display: block;
+  }
+  .savor-design .cooking-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .savor-design .cooking-stage {
+    min-height: 190px;
+    height: 24dvh;
+    max-height: 240px;
+    order: 0;
+  }
+  .savor-design .cooking-bar {
+    padding: 10px 16px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .savor-design .cooking-bar h2 {
+    width: 100%;
+    max-width: 100%;
+    order: 3;
+    font-size: 12px;
+    opacity: .75;
+  }
+  .savor-design .voice-toggle {
+    margin-left: auto;
+  }
+  .savor-design .cooking-instructions {
+    padding: 24px 20px;
+    gap: 16px;
+    order: 1;
+    overflow: visible;
+  }
+  .savor-design .cooking-instructions h1 {
+    font-size: 32px;
+  }
+  .savor-design .stage-bottom {
+    bottom: 40px;
+  }
+  .savor-design .stage-bottom p {
+    font-size: 25px;
+    margin: 10px 0;
+  }
+  .savor-design .stage-tag {
+    display: none;
+  }
+  .savor-design .timer strong {
+    font-size: 40px;
+  }
+  .savor-design .cooking-controls .action {
+    font-size: 12px;
+    padding: 14px;
+  }
+  .savor-design .cooking-controls .text-button {
+    font-size: 12px;
+  }
+}

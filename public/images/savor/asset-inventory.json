@@ -1,0 +1,73 @@
+[
+  {
+    "name": "basil-chicken",
+    "width": 1264,
+    "height": 848,
+    "sourceBytes": 1897045,
+    "bytes": 209162
+  },
+  {
+    "name": "cooking",
+    "width": 1264,
+    "height": 848,
+    "sourceBytes": 1737429,
+    "bytes": 151422
+  },
+  {
+    "name": "cuisines",
+    "width": 1264,
+    "height": 848,
+    "sourceBytes": 2164395,
+    "bytes": 297878
+  },
+  {
+    "name": "kitchen-panorama",
+    "width": 2064,
+    "height": 512,
+    "sourceBytes": 1187990,
+    "bytes": 60182
+  },
+  {
+    "name": "kitchen",
+    "width": 1264,
+    "height": 848,
+    "sourceBytes": 1757729,
+    "bytes": 159976
+  },
+  {
+    "name": "cuisine-malaysian",
+    "width": 421,
+    "height": 424,
+    "bytes": 50244
+  },
+  {
+    "name": "cuisine-chinese",
+    "width": 421,
+    "height": 424,
+    "bytes": 40788
+  },
+  {
+    "name": "cuisine-japanese",
+    "width": 421,
+    "height": 424,
+    "bytes": 50856
+  },
+  {
+    "name": "cuisine-korean",
+    "width": 421,
+    "height": 424,
+    "bytes": 51416
+  },
+  {
+    "name": "cuisine-thai",
+    "width": 421,
+    "height": 424,
+    "bytes": 50640
+  },
+  {
+    "name": "cuisine-italian",
+    "width": 421,
+    "height": 424,
+    "bytes": 54996
+  }
+]

@@ -1,0 +1,20 @@
+.catalog-browser { margin-top:16px; color:#183b2b; border:1px solid #183b2b22; border-radius:14px; background:#fff9; }
+.catalog-browser summary { padding:13px 15px; cursor:pointer; font-size:12px; font-weight:600; min-height:44px; }
+.catalog-browser-content { padding:0 15px 15px; }
+.catalog-browser-content>label { display:block; font-size:11px; font-weight:600; margin:12px 0 6px; }
+.catalog-browser input,.catalog-browser select { width:100%; min-height:44px; border:1px solid #183b2b26; border-radius:10px; background:#fff; color:#183b2b; padding:10px; font-size:12px; }
+.catalog-list { max-height:360px; overflow-y:auto; margin-top:14px; }
+.catalog-list h4 { font-size:11px; font-weight:600; color:#657666; margin:14px 0 8px; }
+.catalog-list p,.catalog-note,.catalog-selected { font-size:11px; line-height:1.7; color:#657666; margin-top:10px; }
+.catalog-cuisines button>span { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.catalog-cuisines button small { display:block; font-size:10px; opacity:.8; margin-top:3px; }
+.catalog-rail .catalog-list button { flex-direction:column; align-items:stretch; min-height:44px; }
+.catalog-chips .catalog-list button { text-align:left; }
+.catalog-equipment-options { display:flex; flex-wrap:wrap; gap:8px; }
+.catalog-equipment-options button { display:flex; align-items:center; gap:7px; min-height:44px; padding:10px 12px; border:1px solid #183b2b22; border-radius:11px; background:#fff; color:#183b2b; font-size:12px; cursor:pointer; }
+.catalog-equipment-options button[aria-pressed=true] { background:#183b2b; color:#fff9ee; border-color:#183b2b; }
+.catalog-equipment-options button:hover { border-color:#ed7136; }
+.catalog-browser :focus-visible,.catalog-cuisines button:focus-visible { outline:2px solid #ed7136; outline-offset:3px; }
+.catalog-rail .catalog-browser-content { padding:0 10px 10px; }
+.catalog-rail .catalog-browser summary { padding:12px 10px; }
+@media(max-width:480px) { .catalog-equipment-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }.catalog-equipment-options button { overflow-wrap:anywhere; text-align:left; }.catalog-browser-content { padding:0 10px 12px; } }

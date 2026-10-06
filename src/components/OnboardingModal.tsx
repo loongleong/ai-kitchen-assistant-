@@ -1,4 +1,9 @@
-import React, { useState } from 'react';
+import { CuisineSelector } from './CuisineSelector';
+import { EquipmentCatalogPanel } from './EquipmentCatalogPanel';
+import { SCENE_EQUIPMENT } from '../data/equipmentCatalog';
+import { toggleCuisinePreference } from '../data/cuisineCatalog';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChefHat } from 'lucide-react';
 import { UserKitchenProfile, UserIdentity, CookingSkill, HealthPriority } from '../types';
 import { IDENTITIES_DATA } from '../data/initialProfile';
 
@@ -28,27 +33,40 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   const [avoidFoods, setAvoidFoods] = useState<string[]>(userProfile.foodsToAvoid);
   const [healthPriority, setHealthPriority] = useState<HealthPriority>(userProfile.healthPriority);
 
+  // Reopening setup reads the current profile, including tools/cuisines added in Profile.
+  useEffect(() => {
+    if (!isOpen) return;
+    setStep(initialStep);
+    setSelectedIdentity(userProfile.identity);
+    setBudget(userProfile.typicalBudgetRM);
+    setCookingSkill(userProfile.cookingSkill);
+    setEquipment([...userProfile.equipment]);
+    setCuisines([...userProfile.favoriteCuisines]);
+    setAvoidFoods([...userProfile.foodsToAvoid]);
+    setHealthPriority(userProfile.healthPriority);
+  }, [isOpen, initialStep, userProfile]);
+
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  useEffect(()=>{
+    if (!isOpen) return;
+    const dialog = dialogRef.current;
+    const returnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    dialog?.showModal();
+    return ()=>{
+      if(dialog?.open)dialog.close();
+      if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true});
+    };
+  },[isOpen]);
+  useEffect(()=>{
+    if (!isOpen) return;
+    bodyRef.current?.scrollTo({top:0,behavior:'instant'});
+    dialogRef.current?.querySelector<HTMLHeadingElement>('h1,h2')?.focus({preventScroll:true});
+  },[isOpen,step]);
   if (!isOpen) return null;
 
-  const handleToggleEquipment = (tool: string) => {
-    if (equipment.includes(tool)) {
-      if (equipment.length > 1) {
-        setEquipment(equipment.filter(t => t !== tool));
-      }
-    } else {
-      setEquipment([...equipment, tool]);
-    }
-  };
-
-  const handleToggleCuisine = (c: string) => {
-    if (cuisines.includes(c)) {
-      if (cuisines.length > 1) {
-        setCuisines(cuisines.filter(item => item !== c));
-      }
-    } else {
-      setCuisines([...cuisines, c]);
-    }
-  };
+  const handleToggleEquipment = (tool:string) => setEquipment(current=>current.includes(tool) ? current.filter(item=>item !== tool) : [...current,tool]);
+  const handleToggleCuisine = (cuisine:string) => setCuisines(current=>toggleCuisinePreference(current,cuisine));
 
   const handleFinish = () => {
     onComplete({
@@ -65,50 +83,50 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 md:p-6 animate-fadeIn">
+    <dialog ref={dialogRef} className="setup-dialog savor-design" aria-label="SavorAI Setup" onCancel={onClose}>
       <div 
-        className="relative bg-[#FBF9F5] w-full max-w-3xl rounded-3xl shadow-2xl border border-[#183B2B]/10 overflow-hidden my-6"
+        className="relative premium-inset w-full max-w-3xl rounded-3xl shadow-2xl border premium-border overflow-hidden my-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Onboarding Header with Progress Indicator */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#183B2B]/8 bg-white/70">
+        <div className="flex items-center justify-between px-6 py-4 border-b premium-border premium-soft">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-[#183B2B]">SavorAI Setup</span>
-            <span className="text-xs text-[#1C2520]/50">·</span>
-            <span className="text-xs text-[#1C2520]/75 font-semibold">
+            <span className="text-xs font-bold premium-ink">SavorAI Setup</span>
+            <span className="text-xs premium-faint">·</span>
+            <span className="text-xs premium-muted font-semibold">
               Step {step} of 3
             </span>
           </div>
 
           {/* Progress bar */}
-          <div className="w-32 bg-[#EAF2EC] h-2 rounded-full overflow-hidden">
+          <div className="w-32 premium-tint h-2 rounded-full overflow-hidden">
             <div 
-              className="bg-[#183B2B] h-full rounded-full transition-all duration-300"
+              className="premium-solid h-full rounded-full transition-all duration-300"
               style={{ width: `${(step / 3) * 100}%` }}
             />
           </div>
 
           <button
             onClick={onClose}
-            className="text-xs text-[#1C2520]/60 hover:text-[#183B2B] font-semibold cursor-pointer"
+            className="text-xs premium-muted premium-hover-ink font-semibold cursor-pointer"
           >
             Skip for now
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 md:p-8 max-h-[80vh] overflow-y-auto">
+        <div ref={bodyRef} className="setup-body p-6 md:p-8 max-h-[80vh] overflow-y-auto">
           {/* STEP 1: ONBOARDING WELCOME */}
           {step === 1 && (
             <div className="space-y-6 animate-fadeIn">
               <div className="text-center max-w-xl mx-auto space-y-3 pt-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#EAF2EC] text-[#183B2B] flex items-center justify-center mx-auto text-2xl font-bold shadow-xs">
-                  🍳
+                <div className="w-14 h-14 rounded-2xl premium-tint premium-ink flex items-center justify-center mx-auto text-2xl font-bold shadow-xs">
+                  <ChefHat size={30} aria-hidden="true"/>
                 </div>
-                <h1 className="text-3xl md:text-4xl font-extrabold text-[#183B2B] tracking-tight">
+                <h1 tabIndex={-1} className="text-3xl md:text-4xl font-extrabold premium-ink tracking-tight">
                   Your kitchen, understood.
                 </h1>
-                <p className="text-sm md:text-base text-[#1C2520]/80 leading-relaxed">
+                <p className="text-sm md:text-base premium-muted leading-relaxed">
                   SavorAI learns your budget, tools, tastes and health goals — then helps you decide what to cook.
                 </p>
               </div>
@@ -122,24 +140,24 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   },
                   {
                     title: 'Stay within your budget',
-                    desc: 'Accurate Ringgit (RM) cost estimates per plate, keeping home cooking affordable.'
+                    desc: 'Estimated meal costs in Ringgit (RM), with current recipe estimates marked as fallbacks.'
                   },
                   {
                     title: 'Get step-by-step guidance',
-                    desc: 'Distraction-free cooking view with visual doneness cues, live timers, and optional AI voice.'
+                    desc: 'Distraction-free cooking view with visual doneness cues, step timers, and text guidance.'
                   },
                   {
-                    title: 'Estimate calories from food photos',
-                    desc: 'Snap a dish photo for instant portion breakdowns with sensible calorie approximations.'
+                    title: 'Understand your plate',
+                    desc: 'Explore sample plates, adjust portion estimates, and keep your daily food log.'
                   }
                 ].map((b, idx) => (
-                  <div key={idx} className="p-4 rounded-2xl bg-white border border-[#183B2B]/8 shadow-xs flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-[#EAF2EC] text-[#183B2B] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                  <div key={idx} className="p-4 rounded-2xl premium-surface border premium-border shadow-xs flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full premium-tint premium-ink flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                       ✓
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-[#183B2B] mb-0.5">{b.title}</h4>
-                      <p className="text-[11px] text-[#1C2520]/70 leading-relaxed">{b.desc}</p>
+                      <h4 className="text-xs font-bold premium-ink mb-0.5">{b.title}</h4>
+                      <p className="text-[11px] premium-muted leading-relaxed">{b.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -148,7 +166,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
               <div className="pt-4 text-center">
                 <button
                   onClick={() => setStep(2)}
-                  className="px-8 py-3.5 rounded-2xl bg-[#183B2B] hover:bg-[#132E22] text-white font-bold text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                  className="px-8 py-3.5 rounded-2xl premium-solid premium-hover-solid text-white font-bold text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer"
                 >
                   Start setup →
                 </button>
@@ -160,10 +178,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {step === 2 && (
             <div className="space-y-6 animate-fadeIn">
               <div>
-                <h2 className="text-2xl font-bold text-[#183B2B] tracking-tight mb-1">
+                <h2 tabIndex={-1} className="text-2xl font-bold premium-ink tracking-tight mb-1">
                   Which best describes you?
                 </h2>
-                <p className="text-xs text-[#1C2520]/70">
+                <p className="text-xs premium-muted">
                   Your identity changes how SavorAI recommends meals, portions, and budget rules.
                 </p>
               </div>
@@ -172,7 +190,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 {IDENTITIES_DATA.map((card) => {
                   const isSelected = selectedIdentity === card.id;
                   return (
-                    <div
+                    <button
+                      type="button"
+                      aria-pressed={isSelected}
                       key={card.id}
                       onClick={() => {
                         setSelectedIdentity(card.id);
@@ -180,45 +200,45 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       }}
                       className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
                         isSelected
-                          ? 'border-[#183B2B] bg-[#EAF2EC] shadow-sm ring-1 ring-[#183B2B]'
-                          : 'border-[#183B2B]/10 bg-white hover:border-[#183B2B]/30'
+                          ? 'premium-border premium-tint shadow-sm ring-1 ring-[#183B2B]'
+                          : 'premium-border premium-surface premium-hover-border'
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
-                          <span className="font-bold text-sm text-[#183B2B]">{card.title}</span>
+                          <span className="font-bold text-sm premium-ink">{card.title}</span>
                           {isSelected && (
-                            <span className="w-5 h-5 rounded-full bg-[#183B2B] text-white text-[11px] flex items-center justify-center">
+                            <span className="w-5 h-5 rounded-full premium-solid text-white text-[11px] flex items-center justify-center">
                               ✓
                             </span>
                           )}
                         </div>
-                        <span className="text-xs font-semibold text-[#E86C38] block mb-2">
+                        <span className="text-xs font-semibold premium-accent block mb-2">
                           {card.tagline}
                         </span>
-                        <p className="text-xs text-[#1C2520]/75 leading-relaxed">
+                        <p className="text-xs premium-muted leading-relaxed">
                           {card.description}
                         </p>
                       </div>
 
-                      <div className="mt-3 pt-2 border-t border-[#183B2B]/10 text-[11px] text-[#183B2B] font-medium">
+                      <div className="mt-3 pt-2 border-t premium-border text-[11px] premium-ink font-medium">
                         Focus: {card.recommendationFocus}
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-[#183B2B]/8">
+              <div className="flex items-center justify-between pt-4 border-t premium-border">
                 <button
                   onClick={() => setStep(1)}
-                  className="px-4 py-2 text-xs font-semibold text-[#1C2520]/70 hover:bg-[#F2EFE8] rounded-xl cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold premium-muted premium-hover-surface rounded-xl cursor-pointer"
                 >
                   ← Back
                 </button>
                 <button
                   onClick={() => setStep(3)}
-                  className="px-6 py-2.5 rounded-xl bg-[#183B2B] text-white text-xs font-bold hover:bg-[#132E22] transition-colors cursor-pointer"
+                  className="px-6 py-2.5 rounded-xl premium-solid text-white text-xs font-bold premium-hover-solid transition-colors cursor-pointer"
                 >
                   Next: Personal Setup →
                 </button>
@@ -230,33 +250,34 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           {step === 3 && (
             <div className="space-y-6 animate-fadeIn">
               <div>
-                <h2 className="text-2xl font-bold text-[#183B2B] tracking-tight mb-1">
+                <h2 tabIndex={-1} className="text-2xl font-bold premium-ink tracking-tight mb-1">
                   Personal Setup
                 </h2>
-                <p className="text-xs text-[#1C2520]/70">
+                <p className="text-xs premium-muted">
                   Calibrate your budget, tools, and health priorities. Calories remain the primary nutrition metric.
                 </p>
               </div>
 
               {/* Typical Cooking Budget */}
-              <div className="p-4 rounded-2xl bg-white border border-[#183B2B]/8">
+              <div className="p-4 rounded-2xl premium-surface border premium-border">
                 <div className="flex justify-between text-xs mb-2">
-                  <span className="font-semibold text-[#1C2520]">Typical Meal Budget</span>
-                  <span className="font-bold text-[#183B2B]">RM{budget} / meal</span>
+                  <span className="font-semibold premium-ink">Typical Meal Budget</span>
+                  <span className="font-bold premium-ink">RM{budget} / meal</span>
                 </div>
                 <input
+                  aria-label="Typical Meal Budget"
                   type="range"
                   min="8"
                   max="35"
                   value={budget}
                   onChange={(e) => setBudget(Number(e.target.value))}
-                  className="w-full h-1.5 bg-[#EAF2EC] rounded-lg appearance-none cursor-pointer accent-[#183B2B]"
+                  className="w-full h-1.5 premium-tint rounded-lg appearance-none cursor-pointer accent-[#183B2B]"
                 />
               </div>
 
               {/* Cooking Skill */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-[#1C2520]">Cooking Skill</label>
+                <label className="text-xs font-semibold premium-ink">Cooking Skill</label>
                 <div className="grid grid-cols-3 gap-2">
                   {(['Beginner', 'Intermediate', 'Confident'] as CookingSkill[]).map((sk) => (
                     <button
@@ -265,8 +286,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       onClick={() => setCookingSkill(sk)}
                       className={`py-2 rounded-xl text-xs font-semibold border cursor-pointer ${
                         cookingSkill === sk
-                          ? 'bg-[#183B2B] text-white border-[#183B2B]'
-                          : 'bg-white text-[#1C2520] border-[#183B2B]/10 hover:border-[#183B2B]/30'
+                          ? 'premium-solid text-white premium-border'
+                          : 'premium-surface premium-ink premium-border premium-hover-border'
                       }`}
                     >
                       {sk}
@@ -277,19 +298,20 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
               {/* Kitchen Equipment */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-[#1C2520]">Kitchen Equipment You Own</label>
+                <label className="text-xs font-semibold premium-ink">Kitchen Equipment You Own</label>
                 <div className="flex flex-wrap gap-2">
-                  {['Stove', 'Frying pan', 'Rice cooker', 'Air fryer', 'Pot', 'Knife', 'Blender', 'Microwave'].map((tool) => {
+                  {SCENE_EQUIPMENT.map(({name:tool}) => {
                     const isSelected = equipment.includes(tool);
                     return (
                       <button
                         key={tool}
                         type="button"
+                        aria-pressed={isSelected}
                         onClick={() => handleToggleEquipment(tool)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-medium border cursor-pointer ${
                           isSelected
-                            ? 'bg-[#183B2B] text-white border-[#183B2B]'
-                            : 'bg-white text-[#1C2520] border-[#183B2B]/10 hover:border-[#183B2B]/30'
+                            ? 'premium-solid text-white premium-border'
+                            : 'premium-surface premium-ink premium-border premium-hover-border'
                         }`}
                       >
                         {isSelected ? `✓ ${tool}` : `+ ${tool}`}
@@ -299,33 +321,18 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 </div>
               </div>
 
+              <EquipmentCatalogPanel selected={equipment} onToggle={handleToggleEquipment} />
+              <p className="catalog-selected">Selected: {equipment.join(', ') || 'No tools selected'}</p>
+
               {/* Favorite Cuisines */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-[#1C2520]">Favourite Cuisines</label>
-                <div className="flex flex-wrap gap-2">
-                  {['Malaysian', 'Japanese', 'Chinese', 'Korean', 'Western', 'Italian'].map((c) => {
-                    const isSelected = cuisines.includes(c);
-                    return (
-                      <button
-                        key={c}
-                        type="button"
-                        onClick={() => handleToggleCuisine(c)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-medium border cursor-pointer ${
-                          isSelected
-                            ? 'bg-[#EAF2EC] text-[#183B2B] font-bold border-[#183B2B]'
-                            : 'bg-white text-[#1C2520] border-[#183B2B]/10 hover:border-[#183B2B]/30'
-                        }`}
-                      >
-                        {isSelected ? `✓ ${c}` : `+ ${c}`}
-                      </button>
-                    );
-                  })}
-                </div>
+                <label className="text-xs font-semibold premium-ink">Favourite Cuisines</label>
+                <CuisineSelector selected={cuisines} onSelect={handleToggleCuisine} />
               </div>
 
               {/* What should SavorAI prioritise? */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-[#183B2B]">What should SavorAI prioritise?</label>
+                <label className="text-xs font-semibold premium-ink">What should SavorAI prioritise?</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {[
                     'Balanced meals',
@@ -342,8 +349,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         onClick={() => setHealthPriority(p as HealthPriority)}
                         className={`p-2.5 rounded-xl border text-xs font-semibold text-left cursor-pointer ${
                           isSelected
-                            ? 'bg-[#183B2B] text-white border-[#183B2B]'
-                            : 'bg-white text-[#1C2520] border-[#183B2B]/10 hover:border-[#183B2B]/30'
+                            ? 'premium-solid text-white premium-border'
+                            : 'premium-surface premium-ink premium-border premium-hover-border'
                         }`}
                       >
                         {p}
@@ -353,16 +360,16 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-[#183B2B]/8">
+              <div className="flex items-center justify-between pt-4 border-t premium-border">
                 <button
                   onClick={() => setStep(2)}
-                  className="px-4 py-2 text-xs font-semibold text-[#1C2520]/70 hover:bg-[#F2EFE8] rounded-xl cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold premium-muted premium-hover-surface rounded-xl cursor-pointer"
                 >
                   ← Back
                 </button>
                 <button
                   onClick={handleFinish}
-                  className="px-6 py-2.5 rounded-xl bg-[#E86C38] hover:bg-[#D45924] text-white text-xs font-bold shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                  className="setup-complete px-6 py-2.5 rounded-xl bg-[#E86C38] hover:bg-[#D45924] text-white text-xs font-bold shadow-md transition-all active:scale-[0.98] cursor-pointer"
                 >
                   Complete Setup & Open Kitchen →
                 </button>
@@ -371,6 +378,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </dialog>
   );
 };

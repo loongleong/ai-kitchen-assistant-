@@ -1,0 +1,55 @@
+.savor-design .panorama-track {
+  width: 2880px;
+  height: 485px;
+}
+.savor-design .panorama-summary {
+  background: #EAF2EC;
+}
+.savor-design .panorama-tool {
+  min-height: 44px;
+}
+.savor-design .panorama-tool.is-selected {
+  box-shadow: 0 0 0 3px #d9c07826,0 4px 16px #0b241940;
+}
+.savor-design .panorama-map button {
+  min-height: 44px;
+  justify-content: center;
+}
+.savor-design .panorama-navigation>button {
+  width: 44px;
+  height: 44px;
+}
+.savor-design .selected-tools button {
+  min-height: 44px;
+}
+.savor-design .panoramic-step>.equipment-browser {
+  margin-top: 24px;
+}
+.savor-design .panorama-summary .selected-tools {
+  max-height: 230px;
+}
+@media(max-width:760px) {
+  .savor-design .panorama-track {
+    width: 2080px;
+    height: 410px;
+  }
+  .savor-design .panorama-zone {
+    flex-basis: 520px;
+  }
+  .savor-design .panorama-navigation {
+    gap: 8px;
+  }
+  .savor-design .panorama-map {
+    gap: 6px;
+  }
+  .savor-design .panorama-map button {
+    font-size: 9px;
+  }
+  .savor-design .panorama-summary .selected-tools {
+    max-height: none;
+  }
+  .savor-design .panorama-summary .inventory-bottom {
+    position: static;
+    padding: 0;
+  }
+}

@@ -1,0 +1,249 @@
+.savor-design .early-gallery {
+  max-width: 1284px;
+  padding: 24px 32px 60px;
+  margin-top: 0;
+}
+.savor-design .gallery-feature-visual .food-visual {
+  height: 100%;
+  background: radial-gradient(ellipse at 50% 40%,#405739,#102D21);
+}
+.savor-design .gallery-photo-link:hover .food-visual img {
+  transform: scale(1.035);
+}
+.savor-design .gallery-primary {
+  background: #183B2B;
+  min-height: 52px;
+}
+.savor-design .gallery-primary:active {
+  transform: translateY(1px);
+}
+.gallery-budget-note {
+  font-size: 11px;
+  color: #637568;
+}
+.gallery-budget-note strong {
+  font-weight: 600;
+  color: #183B2B;
+}
+.gallery-reasoning {
+  width: 100%;
+  border-top: 1px solid #dfe5dd;
+  padding-top: 16px;
+}
+.gallery-reasoning summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  font-size: 12px;
+  min-height: 44px;
+}
+.gallery-reasoning ul {
+  margin: 14px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  font-size: 11px;
+  color: #637568;
+}
+.gallery-reasoning li {
+  display: flex;
+  gap: 8px;
+}
+.gallery-reasoning li>svg {
+  flex-shrink: 0;
+}
+.gallery-reasoning p {
+  font-size: 11px;
+  color: #637568;
+  margin-bottom: 10px;
+}
+.gallery-pantry-hud {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  padding: 16px 20px;
+  backdrop-filter: blur(12px);
+  background: #183b2bc2;
+  border: 1px solid #b6c3a655;
+  border-radius: 18px;
+  color: #FBF9F5;
+  pointer-events: none;
+}
+.gallery-pantry-hud small {
+  display: block;
+  font-size: 11px;
+  color: #c2d0bb;
+}
+.gallery-pantry-hud strong {
+  display: block;
+  font-size: 44px;
+  font-weight: 500;
+  letter-spacing: -2px;
+  line-height: 1.3;
+}
+.gallery-pantry-hud strong>span {
+  font-size: 16px;
+  letter-spacing: 0;
+}
+.savor-design .refined-breakdown {
+  background: linear-gradient(130deg,#244632,#102D21);
+  color: #FBF9F5;
+  border: 1px solid #b6c3a644;
+}
+.savor-design .refined-breakdown span, .savor-design .refined-breakdown>small {
+  color: #c9d6c8;
+}
+.gallery-filter-drawer {
+  margin-top: 28px;
+  border: 1px solid #dfe5dd;
+  border-radius: 20px;
+  background: #ffffff80;
+}
+.gallery-filter-drawer>summary {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 60px;
+  padding: 18px 24px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.gallery-filter-drawer>summary::before {
+  content: '+';
+  color: #c45223;
+  font-size: 22px;
+}
+.gallery-filter-drawer[open]>summary::before {
+  content: '−';
+}
+.gallery-filter-drawer>summary>span {
+  margin-left: auto;
+  color: #637568;
+  font-size: 11px;
+}
+.gallery-filters {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 24px;
+  border: 0;
+  border-top: 1px solid #dfe5dd;
+  box-shadow: none;
+  border-radius: 0 0 20px 20px;
+}
+.gallery-filters>div {
+  margin: 0!important;
+  min-width: 0;
+}
+.gallery-filters>div:first-child {
+  grid-column: 1/-1;
+}
+.gallery-sort {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 10px;
+  color: #637568;
+}
+.gallery-sort select {
+  padding: 10px 14px;
+  border: 1px solid #dfe5dd;
+  border-radius: 10px;
+  background: white;
+  min-height: 44px;
+  color: #183B2B;
+  font-size: 11px;
+}
+.gallery-empty {
+  text-align: center;
+  padding: 50px 24px;
+  background: #EAF2EC;
+  border-radius: 24px;
+}
+.gallery-empty>svg {
+  margin: 0 auto 14px;
+}
+.gallery-empty h2 {
+  font-size: 28px;
+}
+.gallery-empty p {
+  font-size: 13px;
+  color: #637568;
+  margin: 16px 0 24px;
+}
+.savor-design .gallery-card-match {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  color: #FBF9F5;
+  background: #183b2bbd;
+  backdrop-filter: blur(8px);
+  border: 1px solid #b6c3a633;
+  border-radius: 18px;
+  padding: 7px 11px;
+  font-size: 10px;
+  pointer-events: none;
+}
+.savor-design .gallery-save, .savor-design .gallery-open {
+  width: 44px;
+  height: 44px;
+}
+.savor-design .gallery-card h3 button {
+  text-align: left;
+}
+.savor-design .gallery-card-nutrition {
+  font-size: 10px;
+  color: #637568;
+  margin-top: 12px;
+}
+.savor-design .gallery-card-visual .food-visual {
+  position: absolute;
+  inset: 0;
+}
+.savor-design .gallery-card-visual .gallery-photo-link {
+  position: absolute;
+  inset: 0;
+}
+.savor-design .gallery-card:hover .food-visual img {
+  transform: scale(1.035);
+}
+.savor-design .gallery-tools span {
+  font-size: 10px;
+}
+@media(max-width:900px) {
+  .gallery-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media(max-width:700px) {
+  .savor-design .early-gallery {
+    padding: 18px 18px 40px;
+  }
+  .gallery-filters {
+    grid-template-columns: 1fr;
+  }
+  .savor-design .gallery-grid-heading {
+    align-items: flex-start;
+    gap: 22px;
+    flex-direction: column;
+  }
+  .gallery-sort {
+    width: 100%;
+  }
+  .savor-design .gallery-feature-actions {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .savor-design .gallery-feature-copy {
+    padding: 24px;
+  }
+  .savor-design .gallery-photo-note {
+    font-size: 7px;
+    max-width: 60%;
+  }
+  .savor-design .gallery-facts strong {
+    font-size: 26px;
+  }
+}

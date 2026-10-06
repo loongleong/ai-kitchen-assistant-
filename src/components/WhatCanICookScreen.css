@@ -1,0 +1,282 @@
+.flow-profile-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: #637568;
+}
+.flow-profile-strip .text-button {
+  gap: 12px;
+}
+.flow-profile-strip .text-button>span {
+  color: #c45223;
+  font-size: 10px;
+}
+.flow-scene {
+  animation: design-enter .45s cubic-bezier(.22,1,.36,1) both;
+}
+.savor-design .cuisine-card .food-visual {
+  aspect-ratio: 1.25;
+  height: auto;
+}
+.savor-design .cuisine-card:hover img {
+  transform: scale(1.045);
+}
+.savor-design .cuisine-caption small {
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+  color: #637568;
+  margin-top: 3px;
+}
+.cuisine-availability {
+  font-size: 11px;
+  color: #637568;
+}
+.savor-design .discovery-hero>.food-visual {
+  position: absolute;
+  inset: 0;
+  animation: cuisine-reveal .45s ease-out;
+}
+.savor-design .discovery-hero .hero-shade {
+  background: linear-gradient(#102d21d9,transparent 58%,#102d21f2);
+}
+.savor-design .discovery-hero .hud-note {
+  position: absolute;
+  bottom: 100px;
+  left: 30px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  background: #244632a6;
+  border: 1px solid #b6c3a644;
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  font-size: 12px;
+}
+.savor-design .hud-note p {
+  font-size: 10px;
+  color: #c4d0c5;
+  margin-top: 4px;
+}
+.hud-note>svg {
+  margin-left: auto;
+}
+.savor-design .hero-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+.savor-design .hero-bottom small {
+  font-size: 9px;
+  letter-spacing: 0;
+  color: #b9c9be;
+}
+.savor-design .budget-input input {
+  border: 0;
+  color: #183B2B;
+  font-variant-numeric: tabular-nums;
+  min-height: 90px;
+}
+.savor-design .stepper button {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+}
+.savor-design .stepper output {
+  font-size: 24px;
+  min-width: 26px;
+  text-align: center;
+}
+.cook-error {
+  font-size: 12px;
+  color: #b74122;
+}
+.cook-ingredient-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border: 1px solid #dfe5dd;
+  border-radius: 14px;
+  padding: 8px 12px;
+}
+.cook-ingredient-form input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  padding: 12px;
+  outline: none;
+}
+.cook-ingredient-form button {
+  width: 44px;
+  height: 44px;
+  background: #183B2B;
+  color: white;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+}
+.cook-tray-heading {
+  font-size: 14px;
+  margin: 24px 0 12px;
+}
+.cook-ingredient-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.cook-ingredient-chips>span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 14px;
+  background: #EAF2EC;
+  border: 1px solid #ccd9cb;
+  border-radius: 12px;
+  font-size: 12px;
+  min-height: 44px;
+}
+.cook-ingredient-chips button {
+  width: 32px;
+  height: 44px;
+  color: #637568;
+  font-size: 18px;
+}
+.cook-staples {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid #dfe5dd;
+}
+.cook-staples h3 {
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.cook-staples>div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.cook-empty-note {
+  font-size: 12px;
+  margin-top: 16px;
+  color: #637568;
+}
+.savor-design .refine-context button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  color: #c45223;
+  min-height: 44px;
+}
+.refine-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.cook-health-toggle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  margin-top: 22px;
+  border: 1px solid #dfe5dd;
+  border-radius: 16px;
+  background: #EAF2EC;
+  width: 100%;
+  text-align: left;
+  font-size: 12px;
+}
+.cook-health-toggle>span:nth-child(2) {
+  flex: 1;
+}
+.cook-health-toggle small {
+  display: block;
+  color: #637568;
+  font-size: 10px;
+  margin-top: 4px;
+}
+.cook-toggle {
+  width: 36px;
+  height: 22px;
+  background: #bccbbd;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  padding: 3px;
+}
+.cook-toggle i {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: transform .22s;
+}
+.cook-toggle.is-on {
+  background: #183B2B;
+}
+.cook-toggle.is-on i {
+  transform: translateX(14px);
+}
+@media(max-width:1050px) {
+  .savor-design .discovery-hero {
+    display: block;
+    min-height: 400px;
+  }
+  .savor-design .discovery-grid {
+    grid-template-columns: 1fr;
+  }
+  .savor-design .hero-copy {
+    max-width: 420px;
+  }
+}
+@media(max-width:700px) {
+  .flow-profile-strip>.text-button {
+    font-size: 10px;
+    max-width: 65%;
+    text-align: right;
+  }
+  .flow-profile-strip .text-button>span {
+    display: none;
+  }
+  .savor-design .discovery-hero {
+    min-height: 380px;
+  }
+  .savor-design .discovery-hero .hud-note {
+    left: 20px;
+    right: 20px;
+    bottom: 80px;
+    padding: 16px;
+  }
+  .savor-design .hero-copy h2 {
+    font-size: 32px;
+  }
+  .refine-actions {
+    gap: 10px;
+  }
+  .savor-design .budget-input input {
+    font-size: 60px;
+    letter-spacing: -3px;
+  }
+  .savor-design .servings-row {
+    flex-wrap: wrap;
+  }
+  .savor-design .step-footer {
+    flex-wrap: wrap;
+  }
+  .savor-design .time-option {
+    min-width: 95px;
+  }
+  .savor-design .refine-context {
+    gap: 10px;
+  }
+}

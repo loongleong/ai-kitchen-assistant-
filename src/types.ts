@@ -1,3 +1,6 @@
+import type { EquipmentRequirement } from './data/equipmentCatalog';
+import type { IngredientQuantity, RecipePricing, RecipePricingFallback } from './lib/pricing';
+
 export type UserIdentity = 
   | 'Student'
   | 'Family / Household'
@@ -17,6 +20,8 @@ export type HealthPriority =
 
 export interface IngredientItem {
   id: string;
+  ingredientId?: string; // Stable pricing ID, separate from the recipe row ID.
+  pricingQuantities?: IngredientQuantity[]; // Base quantities, supplied explicitly for mixes/alternatives.
   name: string;
   amount: string;
   have: boolean;
@@ -55,7 +60,11 @@ export interface Recipe {
   tagline: string;
   cuisine: string;
   timeMinutes: number;
-  estimatedCostRM: number;
+  estimatedCostRM: number; // Legacy display alias; new code uses pricing.estimatedMealCostRM.
+  pricingFallback?: RecipePricingFallback;
+  pricing?: RecipePricing;
+  cuisineIds?: string[]; // Explicit taxonomy tags from the recipe source; never inferred.
+  source?: { providerId:string; recipeId:string; url?:string };
   servings: number;
   difficulty: 'Beginner' | 'Easy' | 'Intermediate';
   calories: number;
@@ -64,6 +73,7 @@ export interface Recipe {
   fat: number;
   fibre: number;
   requiredEquipment: string[];
+  equipmentRequirements?: EquipmentRequirement[];
   ingredients: IngredientItem[];
   matchScore: number; // 0 - 100
   matchReason: string;

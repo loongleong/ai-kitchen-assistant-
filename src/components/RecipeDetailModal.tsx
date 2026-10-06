@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
+import { AnimatePresence, LazyMotion, domAnimation, m, useReducedMotion } from 'motion/react';
+import { ArrowDown, ArrowRight, ArrowUpRight, Bookmark, Check, ChevronDown, Clock3, Flame, Leaf, Play, Sparkles, Utensils, Wallet, X } from 'lucide-react';
 import { Recipe, UserKitchenProfile } from '../types';
-import { DishIllustration } from './DishIllustration';
+import { FoodVisual } from './FoodVisual';
+import { useNativeModal } from './DesignUI';
+import { CookingQueryFilters } from '../lib/cookingFlow';
+import { equipmentCompatibility } from '../data/equipmentCatalog';
+import { estimateRecipePricing } from '../lib/pricing';
+import { useRecipeData } from './RecipeDataContext';
 
 interface RecipeDetailModalProps {
   recipe: Recipe;
@@ -9,6 +16,7 @@ interface RecipeDetailModalProps {
   isSaved: boolean;
   onToggleSave: (recipeId: string) => void;
   userProfile: UserKitchenProfile;
+  queryContext?: CookingQueryFilters | null;
 }
 
 export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
@@ -17,10 +25,12 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
   onStartCooking,
   isSaved,
   onToggleSave,
-  userProfile
+  userProfile,
+  queryContext = null
 }) => {
-  const [healthierMode, setHealthierMode] = useState(false);
+  const [healthierMode, setHealthierMode] = useState(queryContext?.healthyMode ?? false);
   const [activeSubstituteId, setActiveSubstituteId] = useState<string | null>(null);
+  const dialogRef = useNativeModal();
 
   const displayCalories = healthierMode ? recipe.healthierVariant.calories : recipe.calories;
   const displayProtein = healthierMode ? recipe.healthierVariant.protein : recipe.protein;
@@ -31,329 +41,117 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
   const alreadyHaveIngredients = recipe.ingredients.filter(i => i.have);
   const needToBuyIngredients = recipe.ingredients.filter(i => !i.have);
 
+  const reducedMotion = useReducedMotion();
+  const pantryKnown = queryContext?.stage !== 'early';
+  const kitchenTools = queryContext?.equipment ?? userProfile.equipment;
+  const mealBudget = queryContext?.budgetRM ?? userProfile.typicalBudgetRM;
+  const toolFit = equipmentCompatibility(recipe.requiredEquipment,kitchenTools,recipe.equipmentRequirements);
+  const missingEquipment = toolFit.missing;
+  const preferredCuisine = userProfile.favoriteCuisines.some(cuisine => cuisine.toLowerCase() === recipe.cuisine.toLowerCase());
+  const pricingData = useRecipeData();
+  const pricing = estimateRecipePricing(recipe,{...pricingData,budgetRM:mealBudget,pantryKnown});
+  const budgetFits = pricing.budgetShortfallRM === 0;
+  const transition = { duration: reducedMotion ? 0 : 0.24 };
+
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 md:p-6 animate-fadeIn">
-      <div 
-        className="relative bg-[#FBF9F5] w-full max-w-4xl rounded-3xl shadow-2xl border border-[#183B2B]/10 overflow-hidden my-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Modal Top Bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#183B2B]/8 bg-white/70">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-[#EAF2EC] text-[#183B2B]">
-              {recipe.matchScore}% Match
-            </span>
-            <span className="text-xs text-[#1C2520]/60">·</span>
-            <span className="text-xs font-medium text-[#1C2520]/80">{recipe.cuisine}</span>
-            <span className="text-xs text-[#1C2520]/60">·</span>
-            <span className="text-xs font-medium text-[#1C2520]/80">{recipe.difficulty}</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onToggleSave(recipe.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                isSaved 
-                  ? 'bg-[#E86C38]/15 text-[#E86C38]' 
-                  : 'bg-[#F2EFE8] text-[#1C2520] hover:bg-[#EAF2EC] hover:text-[#183B2B]'
-              }`}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill={isSaved ? '#E86C38' : 'none'} stroke="currentColor" strokeWidth="2">
-                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-              </svg>
-              <span>{isSaved ? 'Saved to Cook' : 'Save Recipe'}</span>
-            </button>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 rounded-full bg-[#F2EFE8] flex items-center justify-center text-[#1C2520]/70 hover:bg-[#183B2B] hover:text-white transition-colors cursor-pointer"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
-          </div>
+    <LazyMotion features={domAnimation}>
+    <dialog ref={dialogRef} className="premium-detail-overlay premium-theme rd-overlay savor-design" aria-labelledby="rd-title" onCancel={event=>{event.preventDefault();onClose()}}>
+      <div className="rd-dialog" onClick={(e) => e.stopPropagation()}>
+        <div className="rd-topbar">
+          <button type="button" className="rd-back" onClick={onClose}>← Back to your matches</button>
+          <button type="button" className="rd-close" onClick={onClose} aria-label="Close recipe details"><X size={18} /></button>
         </div>
 
-        {/* Modal Scrollable Body */}
-        <div className="p-6 md:p-8 max-h-[80vh] overflow-y-auto space-y-8">
-          {/* Header Showcase Hero */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-            <div className="md:col-span-5 aspect-[4/3] rounded-2xl overflow-hidden shadow-md">
-              <DishIllustration dishId={recipe.id} className="w-full h-full" />
+        <div className="rd-scroll">
+          <section className="rd-hero" aria-labelledby="rd-title">
+            <div className="rd-food-stage"><FoodVisual recipe={recipe} priority/><span className="rd-photo-badge"><Sparkles size={14}/>{pantryKnown?recipe.matchScore+(queryContext?.stage==='refined'?'% PANTRY MATCH':'% RECIPE MATCH'):'YOUR KITCHEN PICK'}</span><span className="rd-photo-caption">A LITTLE HEAT. A LOT OF HAPPINESS.</span></div>
+            <div className="rd-hero-copy">
+              <p className="rd-eyebrow">{recipe.cuisine} · SIMPLE, SATISFYING, YOURS</p><h1 id="rd-title">{recipe.name}</h1><p className="rd-tagline">{recipe.tagline}</p>
+              <div className="rd-price-numbers"><div><small>Estimated meal cost</small><strong>RM{pricing.estimatedMealCostRM.toFixed(2)}</strong></div><div><small>Additional shopping required</small><strong>{!pantryKnown?'Not assessed':pricing.additionalShoppingCostRM===null?pricing.knownAdditionalShoppingCostRM>0?'At least RM'+pricing.knownAdditionalShoppingCostRM.toFixed(2):'Unavailable':'RM'+pricing.additionalShoppingCostRM.toFixed(2)}</strong></div><div><small>{budgetFits?'Remaining budget':'Over budget by'}</small><strong>RM{(budgetFits?pricing.remainingBudgetRM!:pricing.budgetShortfallRM).toFixed(2)}</strong></div></div>
+              <div className="rd-recipe-meta"><span><Clock3 size={16}/>{recipe.timeMinutes} min</span><span><Flame size={16}/><m.span key={displayCalories} initial={{opacity:reducedMotion?1:0}} animate={{opacity:1}} transition={transition}>{displayCalories}</m.span> kcal</span><span><Utensils size={16}/>{recipe.servings} servings</span></div>
+              <p className="rd-hero-readiness"><Check size={15}/>{pantryKnown?alreadyHaveIngredients.length+' of '+recipe.ingredients.length+' ingredients ready':'Pantry not checked yet. Review the ingredients below.'}</p>
+              <div className="rd-hero-actions"><button type="button" className="rd-primary" onClick={()=>onStartCooking(recipe,healthierMode)}>Start Cooking <ArrowUpRight size={17}/></button><button type="button" className="rd-save" aria-pressed={isSaved} onClick={()=>onToggleSave(recipe.id)}><Bookmark size={16} fill={isSaved?'currentColor':'none'}/>{isSaved?'Saved to your recipes':'Save for another day'}</button></div>
+              <span className="rd-hero-footnote">{pricing.mealMethod==='legacy-recipe-fallback'?'Fallback recipe estimate':'Ingredient estimate'} · calories per serving · {healthierMode?'Healthier version selected':'Original version'}</span>
             </div>
+          </section>
 
-            <div className="md:col-span-7 flex flex-col justify-between">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-[#183B2B] tracking-tight leading-tight mb-2">
-                  {recipe.name}
-                </h1>
-                <p className="text-sm text-[#1C2520]/75 leading-relaxed mb-4">
-                  {recipe.tagline}
-                </p>
+          <div className="rd-content">
+            <section className="rd-reasoning" aria-labelledby="rd-reason-title">
+              <div className="rd-section-intro"><p className="rd-eyebrow">01 / The kitchen fit</p><h2 id="rd-reason-title">Why SavorAI picked this for you</h2><p className="rd-match-reason">{recipe.matchReason}</p></div>
+              <ul className="rd-reason-list">
+                <li><Check size={15} aria-hidden="true" /><span><strong>{pantryKnown ? `${alreadyHaveIngredients.length} / ${recipe.ingredients.length} ingredients ready` : `Portioned for ${recipe.servings} servings`}</strong><small>{pantryKnown ? queryContext?.stage === 'refined' ? 'Based on the ingredient list you supplied' : 'Based on this recipe’s pantry inventory' : 'Check the recipe ingredients before you begin'}</small></span></li>
+                <li className={budgetFits ? '' : 'rd-reason-caution'}>{budgetFits ? <Check size={15} aria-hidden="true" /> : <Wallet size={15} aria-hidden="true" />}<span><strong>{budgetFits ? queryContext ? 'Fits your selected budget' : 'Fits your usual budget' : queryContext ? 'Above your selected budget' : 'Above your usual budget'}</strong><small>Estimated meal cost RM{pricing.estimatedMealCostRM.toFixed(2)} · {budgetFits ? `Remaining budget RM${pricing.remainingBudgetRM!.toFixed(2)}` : `Over budget by RM${pricing.budgetShortfallRM.toFixed(2)}`} {pricing.mealMethod === 'legacy-recipe-fallback' && '· Fallback recipe estimate'}</small></span></li>
+                <li className={missingEquipment.length ? 'rd-reason-caution' : ''}>{missingEquipment.length ? <Utensils size={15} aria-hidden="true" /> : <Check size={15} aria-hidden="true" />}<span><strong>{missingEquipment.length ? `${recipe.requiredEquipment.length - missingEquipment.length} / ${recipe.requiredEquipment.length} tools available` : 'Uses equipment you own'}</strong><small>{missingEquipment.length ? `Still needed: ${missingEquipment.join(', ')}` : 'Your kitchen is ready'}</small></span></li>
+                <li><Clock3 size={15} aria-hidden="true" /><span><strong>Ready in {recipe.timeMinutes} minutes</strong><small>Recipe’s estimated cooking time</small></span></li>
+                {preferredCuisine && <li><Check size={15} aria-hidden="true" /><span><strong>Matches your preferred cuisine</strong><small>{recipe.cuisine} is in your kitchen profile</small></span></li>}
+              </ul>
+            </section>
 
-                {/* Why it matches */}
-                <div className="bg-[#EAF2EC] rounded-2xl p-3.5 mb-5 border border-[#183B2B]/10">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-[#183B2B] mb-1">
-                    <span className="w-2 h-2 rounded-full bg-[#183B2B]" />
-                    <span>Why SavorAI matched this for you:</span>
-                  </div>
-                  <p className="text-xs text-[#1C2520]/80">
-                    {recipe.matchReason}
-                  </p>
-                </div>
-              </div>
-
-              {/* Quick specs grid */}
-              <div className="grid grid-cols-3 gap-3 bg-white p-3.5 rounded-2xl border border-[#183B2B]/6">
-                <div>
-                  <span className="text-[11px] text-[#1C2520]/60 block">Prep & Cook</span>
-                  <span className="text-sm font-bold text-[#183B2B]">{recipe.timeMinutes} mins</span>
-                </div>
-                <div>
-                  <span className="text-[11px] text-[#1C2520]/60 block">Est. Cost</span>
-                  <span className="text-sm font-bold text-[#183B2B]">RM{recipe.estimatedCostRM.toFixed(2)}</span>
-                </div>
-                <div>
-                  <span className="text-[11px] text-[#1C2520]/60 block">Servings</span>
-                  <span className="text-sm font-bold text-[#183B2B]">{recipe.servings} people</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Nutrition Section with Prominent Calories and "Make It Healthier" Toggle */}
-          <div className="bg-white rounded-3xl p-6 border border-[#183B2B]/8 shadow-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#183B2B]/6 mb-5">
-              <div>
-                <h3 className="font-bold text-base text-[#183B2B]">Nutritional Profile</h3>
-                <p className="text-xs text-[#1C2520]/65">Per serving breakdown based on standard ingredients</p>
-              </div>
-
-              {/* "Make It Healthier" Interactive Switch */}
-              <button
-                onClick={() => setHealthierMode(!healthierMode)}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 border transition-all cursor-pointer ${
-                  healthierMode
-                    ? 'bg-[#183B2B] text-white border-[#183B2B] shadow-sm'
-                    : 'bg-[#EAF2EC] text-[#183B2B] border-[#183B2B]/20 hover:bg-[#DCEADE]'
-                }`}
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/>
-                  <path d="M12 8v8"/>
-                  <path d="M8 12h8"/>
-                </svg>
-                <span>{healthierMode ? 'Healthier Mode Active' : 'Make it healthier'}</span>
-                <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] bg-white/20">
-                  {healthierMode ? `-${recipe.calories - recipe.healthierVariant.calories} kcal` : 'Save kcal'}
-                </span>
-              </button>
-            </div>
-
-            {/* Macros showcase */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
-              {/* Most Prominent Metric: Calories */}
-              <div className="col-span-2 md:col-span-1 bg-[#183B2B] text-white p-4 rounded-2xl flex flex-col justify-between shadow-xs">
-                <span className="text-xs text-white/70 font-medium">Energy</span>
-                <div className="my-1">
-                  <span className="text-3xl font-extrabold tabular-nums tracking-tight">
-                    {displayCalories}
-                  </span>
-                  <span className="text-xs ml-1 text-white/80">kcal</span>
-                </div>
-                {healthierMode && (
-                  <span className="text-[10px] text-[#A7F3D0] font-medium">
-                    Reduced from {recipe.calories} kcal
-                  </span>
-                )}
-              </div>
-
-              {/* Protein */}
-              <div className="bg-[#F8F6F0] p-4 rounded-2xl flex flex-col justify-between border border-[#183B2B]/6">
-                <span className="text-xs text-[#1C2520]/60">Protein</span>
-                <span className="text-xl font-bold text-[#1C2520] tabular-nums mt-1">{displayProtein}g</span>
-                <span className="text-[10px] text-[#1C2520]/50">30% daily goal</span>
-              </div>
-
-              {/* Carbs */}
-              <div className="bg-[#F8F6F0] p-4 rounded-2xl flex flex-col justify-between border border-[#183B2B]/6">
-                <span className="text-xs text-[#1C2520]/60">Carbohydrates</span>
-                <span className="text-xl font-bold text-[#1C2520] tabular-nums mt-1">{displayCarbs}g</span>
-                <span className="text-[10px] text-[#1C2520]/50">Clean energy</span>
-              </div>
-
-              {/* Fat */}
-              <div className="bg-[#F8F6F0] p-4 rounded-2xl flex flex-col justify-between border border-[#183B2B]/6">
-                <span className="text-xs text-[#1C2520]/60">Healthy Fats</span>
-                <span className="text-xl font-bold text-[#1C2520] tabular-nums mt-1">{displayFat}g</span>
-                <span className="text-[10px] text-[#1C2520]/50">{healthierMode ? 'Low fat glaze' : 'Balanced'}</span>
-              </div>
-
-              {/* Fibre */}
-              <div className="bg-[#F8F6F0] p-4 rounded-2xl flex flex-col justify-between border border-[#183B2B]/6">
-                <span className="text-xs text-[#1C2520]/60">Dietary Fibre</span>
-                <span className="text-xl font-bold text-[#1C2520] tabular-nums mt-1">{displayFibre}g</span>
-                <span className="text-[10px] text-[#15803D]">Gut & satiety</span>
-              </div>
-            </div>
-
-            {/* Healthier modifications preview when active */}
-            {healthierMode && (
-              <div className="bg-[#EAF2EC] rounded-2xl p-4 border border-[#183B2B]/15">
-                <div className="flex items-center gap-2 mb-2 text-xs font-bold text-[#183B2B]">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span>Suggested Healthier Modifications Applied:</span>
-                </div>
-                <ul className="space-y-1.5 text-xs text-[#1C2520]/80 pl-6 list-disc">
-                  {recipe.healthierVariant.modifications.map((mod, idx) => (
-                    <li key={idx}>{mod}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          {/* Ingredients Section: Split into "You already have" and "Need to buy" */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* You already have */}
-            <div className="bg-white rounded-3xl p-6 border border-[#183B2B]/8">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-[#183B2B] text-white flex items-center justify-center text-xs">✓</div>
-                  <h3 className="font-bold text-sm text-[#183B2B]">You Already Have ({alreadyHaveIngredients.length})</h3>
-                </div>
-                <span className="text-[11px] text-[#15803D] font-medium bg-[#EAF2EC] px-2 py-0.5 rounded-md">In pantry</span>
-              </div>
-
-              <div className="space-y-2.5">
-                {alreadyHaveIngredients.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between text-xs py-1.5 px-3 rounded-xl bg-[#FBF9F5] border border-[#183B2B]/5">
-                    <span className="font-medium text-[#1C2520]">{item.name}</span>
-                    <span className="text-[#1C2520]/60 tabular-nums">{item.amount}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Need to buy + Substitutes */}
-            <div className="bg-white rounded-3xl p-6 border border-[#E86C38]/15">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-[#E86C38] text-white flex items-center justify-center text-xs">+</div>
-                  <h3 className="font-bold text-sm text-[#1C2520]">
-                    Need to Buy ({needToBuyIngredients.length})
-                  </h3>
-                </div>
-                <span className="text-[11px] font-semibold text-[#E86C38]">
-                  Est. RM{needToBuyIngredients.reduce((acc, curr) => acc + (curr.estCostIfMissing || 0), 0).toFixed(2)}
-                </span>
-              </div>
-
-              {needToBuyIngredients.length === 0 ? (
-                <div className="text-xs text-[#15803D] bg-[#EAF2EC] p-3 rounded-xl">
-                  You have everything required for this dish!
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {needToBuyIngredients.map((item) => (
-                    <div key={item.id} className="p-3 rounded-xl bg-[#FFF8F5] border border-[#E86C38]/15 space-y-2">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-[#1C2520]">{item.name} ({item.amount})</span>
-                        <span className="font-bold text-[#E86C38]">
-                          ≈ RM{item.estCostIfMissing?.toFixed(2)}
-                        </span>
+            <section className="rd-inventory-section" aria-labelledby="rd-inventory-title">
+              <div className="rd-section-heading"><div><p className="rd-eyebrow">02 / Before you begin</p><h2 id="rd-inventory-title">{pantryKnown ? 'A look inside your kitchen.' : 'Your recipe ingredients.'}</h2></div><span>{recipe.ingredients.length} ingredients · {recipe.servings} servings</span></div>
+              <div className={`rd-inventory ${!pantryKnown ? 'rd-inventory-unchecked' : ''}`}>
+                {pantryKnown && <div className="rd-have">
+                  <div className="rd-inventory-heading"><Check size={17} aria-hidden="true" /><h3>You already have</h3><span>{alreadyHaveIngredients.length.toString().padStart(2, '0')}</span></div>
+                  <ul className="rd-ingredient-list">{alreadyHaveIngredients.map(item => <li key={item.id}><Check size={13} aria-hidden="true" /><span>{item.name}</span><small>{item.amount}</small></li>)}</ul>
+                  {alreadyHaveIngredients.length === 0 && <p className="rd-inventory-empty">Your ingredient list is below.</p>}
+                </div>}
+                <div className="rd-need">
+                  <div className="rd-inventory-heading"><span className="rd-need-symbol">+</span><h3>{pantryKnown ? 'You still need' : 'Recipe checklist'}</h3><span>{needToBuyIngredients.length.toString().padStart(2, '0')}</span></div>
+                  {!pantryKnown && <p className="rd-missing-total">Pantry not checked yet. Review these ingredients and quantities.</p>}
+                  {pantryKnown && <p className="rd-missing-total">Additional shopping required <strong>{pricing.additionalShoppingCostRM === null ? pricing.knownAdditionalShoppingCostRM > 0 ? `At least RM${pricing.knownAdditionalShoppingCostRM.toFixed(2)}` : 'Estimate unavailable' : `RM${pricing.additionalShoppingCostRM.toFixed(2)}`}</strong>{pricing.shoppingMethod === 'incomplete' ? ' · Some items unpriced' : pricing.shoppingMethod === 'legacy-item-fallback' || pricing.shoppingMethod === 'mixed' ? ' · Fallback item estimates' : ''}</p>}
+                  {needToBuyIngredients.length === 0 ? <p className="rd-inventory-empty"><Check size={16} aria-hidden="true" />You have everything required for this dish!</p> : (
+                    <div className="rd-missing-list">{needToBuyIngredients.map(item => (
+                      <div className="rd-missing-item" key={item.id}>
+                        <div className="rd-missing-item-heading"><div><strong>{item.name}</strong><small>{item.amount}</small></div>{pantryKnown && item.estCostIfMissing !== undefined && <span>≈ RM{item.estCostIfMissing.toFixed(2)}</span>}</div>
+                        {item.substitute && <>
+                          <button type="button" className="rd-substitute-button" onClick={() => setActiveSubstituteId(activeSubstituteId === item.id ? null : item.id)} aria-expanded={activeSubstituteId === item.id} aria-controls={`rd-substitute-${item.id}`}><span>{activeSubstituteId === item.id ? 'Hide substitute' : 'Find substitute'}</span><ChevronDown size={14} aria-hidden="true" className={activeSubstituteId === item.id ? 'rd-chevron-open' : ''} /></button>
+                          <AnimatePresence initial={false}>{activeSubstituteId === item.id && <m.div id={`rd-substitute-${item.id}`} className="rd-substitute" initial={{ height: reducedMotion ? 'auto' : 0, opacity: reducedMotion ? 1 : 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: reducedMotion ? 'auto' : 0, opacity: reducedMotion ? 1 : 0 }} transition={transition}><div className="rd-substitute-inner"><p>Suggested replacement</p><div><span>{item.name}</span><ArrowRight size={16} aria-hidden="true" /><strong>{item.substitute}</strong></div>{item.substituteNote && <small>{item.substituteNote}</small>}</div></m.div>}</AnimatePresence>
+                        </>}
                       </div>
-
-                      {/* Find substitute button */}
-                      {item.substitute && (
-                        <div className="pt-2 border-t border-[#E86C38]/10">
-                          <button
-                            onClick={() => setActiveSubstituteId(activeSubstituteId === item.id ? null : item.id)}
-                            className="text-[11px] font-semibold text-[#183B2B] hover:text-[#E86C38] flex items-center gap-1 cursor-pointer transition-colors"
-                          >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-                              <polyline points="16 6 12 2 8 6"/>
-                              <line x1="12" y1="2" x2="12" y2="15"/>
-                            </svg>
-                            <span>{activeSubstituteId === item.id ? 'Hide substitute' : 'Find substitute'}</span>
-                          </button>
-
-                          {activeSubstituteId === item.id && (
-                            <div className="mt-2 p-2.5 rounded-lg bg-white border border-[#183B2B]/10 text-xs text-[#1C2520]/80">
-                              <span className="font-semibold text-[#183B2B] block mb-0.5">
-                                Swap with: {item.substitute}
-                              </span>
-                              <span className="text-[11px] text-[#1C2520]/70">
-                                {item.substituteNote}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    ))}</div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+            </section>
 
-          {/* Kitchen Equipment Required */}
-          <div className="bg-white rounded-3xl p-6 border border-[#183B2B]/8">
-            <h3 className="font-bold text-sm text-[#183B2B] mb-3">Kitchen Equipment Needed</h3>
-            <div className="flex flex-wrap gap-2">
-              {recipe.requiredEquipment.map((tool) => {
-                const userHasIt = userProfile.equipment.some(e => e.toLowerCase() === tool.toLowerCase());
-                return (
-                  <div
-                    key={tool}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 ${
-                      userHasIt
-                        ? 'bg-[#EAF2EC] text-[#183B2B]'
-                        : 'bg-[#F2EFE8] text-[#1C2520]/70'
-                    }`}
-                  >
-                    <span>{userHasIt ? '✓' : '•'}</span>
-                    <span>{tool}</span>
-                    {userHasIt && <span className="text-[10px] text-[#183B2B]/60">(in your kitchen)</span>}
-                  </div>
-                );
-              })}
-            </div>
+            <section className={`rd-healthier ${healthierMode ? 'rd-healthier-active' : ''}`} aria-labelledby="rd-healthier-title">
+              <div className="rd-section-heading"><div><p className="rd-eyebrow"><Leaf size={13} aria-hidden="true" />03 / A little lighter</p><h2 id="rd-healthier-title">Same comfort. A lighter version.</h2><p className="rd-section-description">A lighter version is available, with the adjustments below.</p></div><span className="rd-version-status" aria-live="polite">{healthierMode ? 'Healthier version selected' : 'Original version selected'}</span></div>
+              <div className="rd-transformation">
+                <div className={`rd-version rd-original ${!healthierMode ? 'rd-version-selected' : ''}`}><span>Original</span><div><strong>{recipe.calories}</strong><small>kcal</small></div><p>Classic recipe</p></div>
+                <div className="rd-transform-action"><button type="button" className="rd-health-toggle" onClick={() => setHealthierMode(!healthierMode)} aria-pressed={healthierMode}><Leaf size={16} aria-hidden="true" /><span>{healthierMode ? 'Healthier Mode Active' : 'Make it healthier'}</span><ArrowRight size={16} aria-hidden="true" /></button><small>{healthierMode ? 'Return to original' : `${recipe.calories - recipe.healthierVariant.calories} fewer kcal per serving`}</small></div>
+                <div className={`rd-version rd-lighter ${healthierMode ? 'rd-version-selected' : ''}`}><span>Healthier{healthierMode && <Check size={13} aria-hidden="true" />}</span><div><strong>{recipe.healthierVariant.calories}</strong><small>kcal</small></div><p>With the suggested adjustments</p></div>
+              </div>
+              <m.div className="rd-adjustments" key={healthierMode ? 'selected' : 'preview'} initial={{ opacity: reducedMotion ? 1 : 0.6 }} animate={{ opacity: 1 }} transition={transition}>
+                <h3>{healthierMode ? 'Suggested healthier modifications applied' : 'What changes in the lighter version'}</h3>
+                <ul>{recipe.healthierVariant.modifications.map((mod, idx) => <li key={idx}><Check size={13} aria-hidden="true" /><span>{mod}</span></li>)}</ul>
+                {recipe.healthierVariant.swaps.length > 0 && <div className="rd-health-swaps">{recipe.healthierVariant.swaps.map((swap, idx) => <div key={idx}><span>{swap.original}</span><ArrowRight size={14} aria-hidden="true" /><div><strong>{swap.replacement}</strong><small>{swap.note}</small></div></div>)}</div>}
+              </m.div>
+            </section>
+
+            <section className="rd-nutrition" aria-labelledby="rd-nutrition-title">
+              <div className="rd-section-heading"><div><p className="rd-eyebrow">04 / The nourishment</p><h2 id="rd-nutrition-title">Nutritional profile</h2></div><span>Per serving · {healthierMode ? 'Healthier' : 'Original'} version</span></div>
+              <div className="rd-nutrition-values" aria-live="polite">
+                <div className="rd-calorie-value"><span><Flame size={14} aria-hidden="true" /> Energy</span><div><m.strong key={displayCalories} initial={{ opacity: reducedMotion ? 1 : 0 }} animate={{ opacity: 1 }} transition={transition}>{displayCalories}</m.strong><small>kcal</small></div>{healthierMode && <p>Reduced from {recipe.calories} kcal</p>}</div>
+                <dl className="rd-macros"><div><dt>Protein</dt><dd>{displayProtein}<small>g</small></dd></div><div><dt>Carbs</dt><dd>{displayCarbs}<small>g</small></dd></div><div><dt>Fat</dt><dd>{displayFat}<small>g</small></dd></div><div><dt>Fibre</dt><dd>{displayFibre}<small>g</small></dd></div></dl>
+              </div>
+              <p className="rd-nutrition-note">Estimated per serving based on the recipe ingredients.</p>
+            </section>
+
+            <section className="rd-equipment" aria-labelledby="rd-equipment-title"><div><p className="rd-eyebrow">05 / The tools</p><h2 id="rd-equipment-title">{missingEquipment.length === 0 ? 'Your kitchen is ready.' : 'Your kitchen checklist.'}</h2></div><div className="rd-equipment-items">{recipe.requiredEquipment.map(tool => {
+              const fit = toolFit.checks.find(check=>check.label === tool);
+              const userHasIt = fit?.compatible;
+              return <span key={tool} className={userHasIt ? '' : 'rd-tool-missing'}>{userHasIt ? <Check size={13} aria-hidden="true" /> : <Utensils size={13} aria-hidden="true" />}{tool}<small>{userHasIt ? fit!.ownedTools.includes(tool) ? 'In your kitchen' : `${fit!.ownedTools.join(', ')} works` : 'Needed'}</small></span>;
+            })}</div></section>
+            <div className="rd-end-note"><ArrowDown size={14} aria-hidden="true" />Your ingredients, your pace. Let’s get cooking.</div>
           </div>
         </div>
 
-        {/* Modal Sticky Bottom Action Bar */}
-        <div className="p-6 bg-white border-t border-[#183B2B]/8 flex items-center justify-between">
-          <div>
-            <span className="text-xs text-[#1C2520]/60 block">Ready to cook?</span>
-            <span className="text-sm font-bold text-[#183B2B]">
-              Step-by-step guidance with live timers
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onClose}
-              className="px-5 py-2.5 rounded-xl text-xs font-semibold text-[#1C2520]/70 hover:bg-[#F2EFE8] transition-colors cursor-pointer"
-            >
-              Back
-            </button>
-            <button
-              onClick={() => onStartCooking(recipe, healthierMode)}
-              className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#183B2B] hover:bg-[#132E22] active:scale-[0.98] transition-all shadow-md cursor-pointer flex items-center gap-2"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              <span>Start Cooking Now</span>
-            </button>
-          </div>
+        <div className="rd-actions">
+          <div><strong>{healthierMode ? 'Healthier version ready' : 'Ready to cook?'}</strong><span>{recipe.timeMinutes} min · {recipe.servings} servings · {displayCalories} kcal per serving</span></div>
+          <div><button type="button" className="rd-back" onClick={onClose}>Back</button><button type="button" className="rd-primary" onClick={() => onStartCooking(recipe, healthierMode)}><Play size={14} aria-hidden="true" /><span>Start Cooking Now</span><ArrowUpRight size={16} aria-hidden="true" /></button></div>
         </div>
       </div>
-    </div>
+    </dialog>
+    </LazyMotion>
   );
 };
