@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AnimatePresence, LazyMotion, domAnimation, m, useReducedMotion } from 'motion/react';
-import { ArrowDown, ArrowRight, ArrowUpRight, Bookmark, Check, ChevronDown, Clock3, Flame, Leaf, Play, Sparkles, Utensils, Wallet, X } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Bookmark, Check, ChevronDown, Clock3, Flame, Leaf, Play, Sparkles, Utensils, Wallet, X } from 'lucide-react';
 import { Recipe, UserKitchenProfile } from '../types';
 import { FoodVisual } from './FoodVisual';
 import { useNativeModal } from './DesignUI';
@@ -58,16 +58,16 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
     <dialog ref={dialogRef} className="premium-detail-overlay premium-theme rd-overlay savor-design" aria-labelledby="rd-title" onCancel={event=>{event.preventDefault();onClose()}}>
       <div className="rd-dialog" onClick={(e) => e.stopPropagation()}>
         <div className="rd-topbar">
-          <button type="button" className="rd-back" onClick={onClose}>← Back to your matches</button>
+          <button type="button" className="rd-back" onClick={onClose}><ArrowLeft size={16} aria-hidden="true" /> Back to your matches</button><span className="rd-topbar-label">Savor<span>AI</span> / Your recipe</span>
           <button type="button" className="rd-close" onClick={onClose} aria-label="Close recipe details"><X size={18} /></button>
         </div>
 
         <div className="rd-scroll">
           <section className="rd-hero" aria-labelledby="rd-title">
-            <div className="rd-food-stage"><FoodVisual recipe={recipe} priority/><span className="rd-photo-badge"><Sparkles size={14}/>{pantryKnown?recipe.matchScore+(queryContext?.stage==='refined'?'% PANTRY MATCH':'% RECIPE MATCH'):'YOUR KITCHEN PICK'}</span><span className="rd-photo-caption">A LITTLE HEAT. A LOT OF HAPPINESS.</span></div>
+            <div className="rd-food-stage"><FoodVisual recipe={recipe} priority/><span className="rd-photo-badge"><Sparkles size={14}/>{pantryKnown?recipe.matchScore+(queryContext?.stage==='refined'?'% PANTRY MATCH':'% RECIPE MATCH'):'YOUR KITCHEN PICK'}</span><span className="rd-photo-caption"><span>FROM YOUR KITCHEN</span>A little inspiration for your next meal.</span></div>
             <div className="rd-hero-copy">
-              <p className="rd-eyebrow">{recipe.cuisine} · SIMPLE, SATISFYING, YOURS</p><h1 id="rd-title">{recipe.name}</h1><p className="rd-tagline">{recipe.tagline}</p>
-              <div className="rd-price-numbers"><div><small>Estimated meal cost</small><strong>RM{pricing.estimatedMealCostRM.toFixed(2)}</strong></div><div><small>Additional shopping required</small><strong>{!pantryKnown?'Not assessed':pricing.additionalShoppingCostRM===null?pricing.knownAdditionalShoppingCostRM>0?'At least RM'+pricing.knownAdditionalShoppingCostRM.toFixed(2):'Unavailable':'RM'+pricing.additionalShoppingCostRM.toFixed(2)}</strong></div><div><small>{budgetFits?'Remaining budget':'Over budget by'}</small><strong>RM{(budgetFits?pricing.remainingBudgetRM!:pricing.budgetShortfallRM).toFixed(2)}</strong></div></div>
+              <p className="rd-eyebrow">{recipe.cuisine} <span aria-hidden="true">/</span> {recipe.difficulty}</p><h1 id="rd-title">{recipe.name}</h1><p className="rd-tagline">{recipe.tagline}</p>
+              <div className="rd-price-numbers"><div><small>Estimated meal cost</small><strong>RM{pricing.estimatedMealCostRM.toFixed(2)}</strong></div><div><small>Additional shopping cost</small><strong>{!pantryKnown?'Not assessed':pricing.additionalShoppingCostRM===null?pricing.knownAdditionalShoppingCostRM>0?'At least RM'+pricing.knownAdditionalShoppingCostRM.toFixed(2):'Unavailable':'RM'+pricing.additionalShoppingCostRM.toFixed(2)}</strong></div><div><small>{budgetFits?'Remaining budget':'Over budget by'}</small><strong>RM{(budgetFits?pricing.remainingBudgetRM!:pricing.budgetShortfallRM).toFixed(2)}</strong></div></div>
               <div className="rd-recipe-meta"><span><Clock3 size={16}/>{recipe.timeMinutes} min</span><span><Flame size={16}/><m.span key={displayCalories} initial={{opacity:reducedMotion?1:0}} animate={{opacity:1}} transition={transition}>{displayCalories}</m.span> kcal</span><span><Utensils size={16}/>{recipe.servings} servings</span></div>
               <p className="rd-hero-readiness"><Check size={15}/>{pantryKnown?alreadyHaveIngredients.length+' of '+recipe.ingredients.length+' ingredients ready':'Pantry not checked yet. Review the ingredients below.'}</p>
               <div className="rd-hero-actions"><button type="button" className="rd-primary" onClick={()=>onStartCooking(recipe,healthierMode)}>Start Cooking <ArrowUpRight size={17}/></button><button type="button" className="rd-save" aria-pressed={isSaved} onClick={()=>onToggleSave(recipe.id)}><Bookmark size={16} fill={isSaved?'currentColor':'none'}/>{isSaved?'Saved to your recipes':'Save for another day'}</button></div>
@@ -103,10 +103,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
                     <div className="rd-missing-list">{needToBuyIngredients.map(item => (
                       <div className="rd-missing-item" key={item.id}>
                         <div className="rd-missing-item-heading"><div><strong>{item.name}</strong><small>{item.amount}</small></div>{pantryKnown && item.estCostIfMissing !== undefined && <span>≈ RM{item.estCostIfMissing.toFixed(2)}</span>}</div>
-                        {item.substitute && <>
-                          <button type="button" className="rd-substitute-button" onClick={() => setActiveSubstituteId(activeSubstituteId === item.id ? null : item.id)} aria-expanded={activeSubstituteId === item.id} aria-controls={`rd-substitute-${item.id}`}><span>{activeSubstituteId === item.id ? 'Hide substitute' : 'Find substitute'}</span><ChevronDown size={14} aria-hidden="true" className={activeSubstituteId === item.id ? 'rd-chevron-open' : ''} /></button>
-                          <AnimatePresence initial={false}>{activeSubstituteId === item.id && <m.div id={`rd-substitute-${item.id}`} className="rd-substitute" initial={{ height: reducedMotion ? 'auto' : 0, opacity: reducedMotion ? 1 : 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: reducedMotion ? 'auto' : 0, opacity: reducedMotion ? 1 : 0 }} transition={transition}><div className="rd-substitute-inner"><p>Suggested replacement</p><div><span>{item.name}</span><ArrowRight size={16} aria-hidden="true" /><strong>{item.substitute}</strong></div>{item.substituteNote && <small>{item.substituteNote}</small>}</div></m.div>}</AnimatePresence>
-                        </>}
+
                       </div>
                     ))}</div>
                   )}
@@ -114,8 +111,31 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
               </div>
             </section>
 
+            <section className="rd-substitutions" aria-labelledby="rd-substitutions-title">
+              <div className="rd-section-heading"><div><p className="rd-eyebrow">03 / A flexible kitchen</p><h2 id="rd-substitutions-title">Substitutions</h2><p className="rd-section-description">A different ingredient. The same possibility.</p></div></div>
+              <div className="rd-substitution-list">{needToBuyIngredients.filter(item => item.substitute).map(item => (
+                <div className="rd-missing-item" key={item.id}>
+                  <div className="rd-missing-item-heading"><div><strong>{item.name}</strong><small>{item.amount}</small></div></div>
+                        {item.substitute && <>
+                          <button type="button" className="rd-substitute-button" onClick={() => setActiveSubstituteId(activeSubstituteId === item.id ? null : item.id)} aria-expanded={activeSubstituteId === item.id} aria-controls={`rd-substitute-${item.id}`}><span>{activeSubstituteId === item.id ? 'Hide substitute' : 'Find substitute'}</span><ChevronDown size={14} aria-hidden="true" className={activeSubstituteId === item.id ? 'rd-chevron-open' : ''} /></button>
+                          <AnimatePresence initial={false}>{activeSubstituteId === item.id && <m.div id={`rd-substitute-${item.id}`} className="rd-substitute" initial={{ height: reducedMotion ? 'auto' : 0, opacity: reducedMotion ? 1 : 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: reducedMotion ? 'auto' : 0, opacity: reducedMotion ? 1 : 0 }} transition={transition}><div className="rd-substitute-inner"><p>Suggested replacement</p><div><span>{item.name}</span><ArrowRight size={16} aria-hidden="true" /><strong>{item.substitute}</strong></div>{item.substituteNote && <small>{item.substituteNote}</small>}</div></m.div>}</AnimatePresence>
+                        </>}
+                </div>
+              ))}</div>
+              {!needToBuyIngredients.some(item => item.substitute) && <p className="rd-section-description">No ingredient substitutions suggested for this recipe’s missing ingredients.</p>}
+            </section>
+
+            <section className="rd-nutrition" aria-labelledby="rd-nutrition-title">
+              <div className="rd-section-heading"><div><p className="rd-eyebrow">04 / The nourishment</p><h2 id="rd-nutrition-title">Nutritional profile</h2></div><span>Per serving · {healthierMode ? 'Healthier' : 'Original'} version</span></div>
+              <div className="rd-nutrition-values" aria-live="polite">
+                <div className="rd-calorie-value"><span><Flame size={14} aria-hidden="true" /> Energy</span><div><m.strong key={displayCalories} initial={{ opacity: reducedMotion ? 1 : 0 }} animate={{ opacity: 1 }} transition={transition}>{displayCalories}</m.strong><small>kcal</small></div>{healthierMode && <p>Reduced from {recipe.calories} kcal</p>}</div>
+                <dl className="rd-macros"><div><dt>Protein</dt><dd>{displayProtein}<small>g</small></dd></div><div><dt>Carbs</dt><dd>{displayCarbs}<small>g</small></dd></div><div><dt>Fat</dt><dd>{displayFat}<small>g</small></dd></div><div><dt>Fibre</dt><dd>{displayFibre}<small>g</small></dd></div></dl>
+              </div>
+              <p className="rd-nutrition-note">Estimated per serving based on the recipe ingredients.</p>
+            </section>
+
             <section className={`rd-healthier ${healthierMode ? 'rd-healthier-active' : ''}`} aria-labelledby="rd-healthier-title">
-              <div className="rd-section-heading"><div><p className="rd-eyebrow"><Leaf size={13} aria-hidden="true" />03 / A little lighter</p><h2 id="rd-healthier-title">Same comfort. A lighter version.</h2><p className="rd-section-description">A lighter version is available, with the adjustments below.</p></div><span className="rd-version-status" aria-live="polite">{healthierMode ? 'Healthier version selected' : 'Original version selected'}</span></div>
+              <div className="rd-section-heading"><div><p className="rd-eyebrow"><Leaf size={13} aria-hidden="true" />05 / A little lighter</p><h2 id="rd-healthier-title">Same comfort. A lighter version.</h2><p className="rd-section-description">A lighter version is available, with the adjustments below.</p></div><span className="rd-version-status" aria-live="polite">{healthierMode ? 'Healthier version selected' : 'Original version selected'}</span></div>
               <div className="rd-transformation">
                 <div className={`rd-version rd-original ${!healthierMode ? 'rd-version-selected' : ''}`}><span>Original</span><div><strong>{recipe.calories}</strong><small>kcal</small></div><p>Classic recipe</p></div>
                 <div className="rd-transform-action"><button type="button" className="rd-health-toggle" onClick={() => setHealthierMode(!healthierMode)} aria-pressed={healthierMode}><Leaf size={16} aria-hidden="true" /><span>{healthierMode ? 'Healthier Mode Active' : 'Make it healthier'}</span><ArrowRight size={16} aria-hidden="true" /></button><small>{healthierMode ? 'Return to original' : `${recipe.calories - recipe.healthierVariant.calories} fewer kcal per serving`}</small></div>
@@ -128,16 +148,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
               </m.div>
             </section>
 
-            <section className="rd-nutrition" aria-labelledby="rd-nutrition-title">
-              <div className="rd-section-heading"><div><p className="rd-eyebrow">04 / The nourishment</p><h2 id="rd-nutrition-title">Nutritional profile</h2></div><span>Per serving · {healthierMode ? 'Healthier' : 'Original'} version</span></div>
-              <div className="rd-nutrition-values" aria-live="polite">
-                <div className="rd-calorie-value"><span><Flame size={14} aria-hidden="true" /> Energy</span><div><m.strong key={displayCalories} initial={{ opacity: reducedMotion ? 1 : 0 }} animate={{ opacity: 1 }} transition={transition}>{displayCalories}</m.strong><small>kcal</small></div>{healthierMode && <p>Reduced from {recipe.calories} kcal</p>}</div>
-                <dl className="rd-macros"><div><dt>Protein</dt><dd>{displayProtein}<small>g</small></dd></div><div><dt>Carbs</dt><dd>{displayCarbs}<small>g</small></dd></div><div><dt>Fat</dt><dd>{displayFat}<small>g</small></dd></div><div><dt>Fibre</dt><dd>{displayFibre}<small>g</small></dd></div></dl>
-              </div>
-              <p className="rd-nutrition-note">Estimated per serving based on the recipe ingredients.</p>
-            </section>
-
-            <section className="rd-equipment" aria-labelledby="rd-equipment-title"><div><p className="rd-eyebrow">05 / The tools</p><h2 id="rd-equipment-title">{missingEquipment.length === 0 ? 'Your kitchen is ready.' : 'Your kitchen checklist.'}</h2></div><div className="rd-equipment-items">{recipe.requiredEquipment.map(tool => {
+            <section className="rd-equipment" aria-labelledby="rd-equipment-title"><div><p className="rd-eyebrow">06 / The tools</p><h2 id="rd-equipment-title">Required equipment</h2><p className="rd-section-description">{missingEquipment.length === 0 ? 'Your kitchen is ready.' : 'Your kitchen checklist.'}</p></div><div className="rd-equipment-items">{recipe.requiredEquipment.map(tool => {
               const fit = toolFit.checks.find(check=>check.label === tool);
               const userHasIt = fit?.compatible;
               return <span key={tool} className={userHasIt ? '' : 'rd-tool-missing'}>{userHasIt ? <Check size={13} aria-hidden="true" /> : <Utensils size={13} aria-hidden="true" />}{tool}<small>{userHasIt ? fit!.ownedTools.includes(tool) ? 'In your kitchen' : `${fit!.ownedTools.join(', ')} works` : 'Needed'}</small></span>;
@@ -148,7 +159,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
 
         <div className="rd-actions">
           <div><strong>{healthierMode ? 'Healthier version ready' : 'Ready to cook?'}</strong><span>{recipe.timeMinutes} min · {recipe.servings} servings · {displayCalories} kcal per serving</span></div>
-          <div><button type="button" className="rd-back" onClick={onClose}>Back</button><button type="button" className="rd-primary" onClick={() => onStartCooking(recipe, healthierMode)}><Play size={14} aria-hidden="true" /><span>Start Cooking Now</span><ArrowUpRight size={16} aria-hidden="true" /></button></div>
+          <div><button type="button" className="rd-save rd-footer-save" aria-label={isSaved ? 'Unsave recipe' : 'Save recipe'} aria-pressed={isSaved} onClick={() => onToggleSave(recipe.id)}><Bookmark size={18} aria-hidden="true" fill={isSaved ? 'currentColor' : 'none'} /><span>{isSaved ? 'Saved' : 'Save'}</span></button><button type="button" className="rd-primary" onClick={() => onStartCooking(recipe, healthierMode)}><Play size={14} aria-hidden="true" /><span>Start Cooking Now</span><ArrowUpRight size={16} aria-hidden="true" /></button></div>
         </div>
       </div>
     </dialog>
